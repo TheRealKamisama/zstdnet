@@ -20,6 +20,10 @@
 https://github.com/wish131400/zstdnet-Velocity
 VC版本因为兼容性原因，需要下载velocity插件版本
 
+## spigot的插件版
+https://github.com/Meoyuta/ZstdNet-spigot
+感谢 https://github.com/Meoyuta 移植的插件版本
+
 ### 客户端联机配置
 
 安装好mod后，直接打开局域网即可。游戏端口通常可以留空，ZstdNet 会自动跟随本次实际 LAN 端口；Zstd 端口会优先使用配置里的端口，如果被占用会自动换到可用端口。开放成功后聊天框会提示实际 Zstd 端口，并且端口可以点击复制。如果使用高级联机 mod 完全替换界面导致看不到 Zstd UI，可以用 `/zstdport show` 查看当前端口；只有需要固定公网/隧道端口时，才用 `/zstdport zstd xxxxx` 手动指定。
