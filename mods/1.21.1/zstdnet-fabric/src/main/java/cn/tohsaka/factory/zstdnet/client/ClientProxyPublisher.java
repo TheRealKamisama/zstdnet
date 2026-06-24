@@ -589,9 +589,9 @@ public final class ClientProxyPublisher {
             return false;
         }
 
-        serverData.ip = remoteAddr;
+        serverData.ip = remote.displayAddress();
         String localAddr = "127.0.0.1:" + proxy.localPort();
-        LOGGER.info("zstdnet: {} -> {} via local {}", safe(serverData.name), remoteAddr, localAddr);
+        LOGGER.info("zstdnet: {} -> {} via local {}", safe(serverData.name), remote.displayAddress(), localAddr);
         ConnectScreenHooks.setBypass(true);
         ConnectScreen.startConnecting(parent, Minecraft.getInstance(), ServerAddress.parseString(localAddr), serverData, false, null);
         return true;
@@ -880,12 +880,35 @@ public final class ClientProxyPublisher {
             connectHost,
             resolved.getPort(),
             connectHost,
-            resolved.getPort()
+            resolved.getPort(),
+            normalizeResolvedAddress(remoteAddr, requested)
         );
     }
 
     private static String normalizeAddress(String raw) {
         return raw == null ? "" : raw.trim();
+    }
+
+    private static String normalizeResolvedAddress(String raw, ServerAddress requested) {
+        String trimmed = normalizeAddress(raw);
+        String host = requested == null ? "" : stripBrackets(requested.getHost());
+        if (host.indexOf(':') < 0) {
+            return trimmed;
+        }
+        return formatHostPort(host, requested.getPort());
+    }
+
+    private static String formatHostPort(String host, int port) {
+        String h = stripBrackets(host);
+        return h.indexOf(':') >= 0 ? "[" + h + "]:" + port : h + ":" + port;
+    }
+
+    private static String stripBrackets(String host) {
+        String h = host == null ? "" : host.trim();
+        if (h.startsWith("[") && h.contains("]")) {
+            return h.substring(1, h.indexOf(']')).trim();
+        }
+        return h;
     }
 
     private static boolean isSelectButton(Button button) {
@@ -1316,6 +1339,6 @@ public final class ClientProxyPublisher {
     private record PortValidation(int port, Component error) {
     }
 
-    private record RemoteTarget(String connectHost, int connectPort, String presentedHost, int presentedPort) {
+    private record RemoteTarget(String connectHost, int connectPort, String presentedHost, int presentedPort, String displayAddress) {
     }
 }

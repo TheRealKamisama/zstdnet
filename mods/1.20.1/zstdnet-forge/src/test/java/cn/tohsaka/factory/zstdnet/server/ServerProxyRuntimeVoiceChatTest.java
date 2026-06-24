@@ -3,6 +3,7 @@ package cn.tohsaka.factory.zstdnet.server;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -103,6 +104,34 @@ class ServerProxyRuntimeVoiceChatTest {
         assertTrue(invokeLanVoiceDefaultCheck("isDefaultVoiceChatTarget", ""));
         assertFalse(invokeLanVoiceDefaultCheck("isDefaultVoiceChatListen", "0.0.0.0:24455"));
         assertFalse(invokeLanVoiceDefaultCheck("isDefaultVoiceChatTarget", "127.0.0.1:24454"));
+    }
+
+    @Test
+    void hostPortParsesAndFormatsBracketedIpv6() {
+        ServerProxyRuntime.HostPort endpoint = ServerProxyRuntime.HostPort.parse("[2001:db8::1]:25565");
+
+        assertEquals(new ServerProxyRuntime.HostPort("2001:db8::1", 25565), endpoint);
+        assertEquals("[2001:db8::1]:25565", endpoint.toString());
+        assertEquals("2001:db8::1", ServerProxyConfigFile.parseHost("[2001:db8::1]:25565", "fallback"));
+        assertEquals(25565, ServerProxyConfigFile.parsePort("[2001:db8::1]:25565", -1));
+        assertEquals("[2001:db8::1]:25565", ServerProxyConfigFile.formatHostPort("2001:db8::1", 25565));
+    }
+
+    @Test
+    void unbracketedIpv6UsesDefaultPortAndIsFormattedSafely() {
+        ServerProxyRuntime.HostPort endpoint = ServerProxyRuntime.HostPort.parse("2001:db8::1");
+
+        assertEquals(new ServerProxyRuntime.HostPort("2001:db8::1", 25565), endpoint);
+        assertEquals("[2001:db8::1]:25565", endpoint.toString());
+        assertEquals(25565, ServerProxyConfigFile.parsePort("2001:db8::1", 25565));
+    }
+
+    @Test
+    void wildcardListenUsesAnyLocalBindAddress() {
+        InetSocketAddress address = new ServerProxyRuntime.HostPort("0.0.0.0", 25565).toBindAddress();
+
+        assertEquals(25565, address.getPort());
+        assertTrue(address.getAddress().isAnyLocalAddress());
     }
 
     private static boolean invokeLanVoiceDefaultCheck(String methodName, String value) throws Exception {

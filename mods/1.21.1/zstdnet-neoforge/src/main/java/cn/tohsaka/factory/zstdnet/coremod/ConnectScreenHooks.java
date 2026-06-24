@@ -39,7 +39,7 @@ public final class ConnectScreenHooks {
             return original;
         }
 
-        String remoteAddr = host + ":" + original.getPort();
+        String remoteAddr = formatHostPort(host, original.getPort());
         ResolvedServerAddress resolved = ServerNameResolver.DEFAULT.resolveAddress(original).orElse(null);
         if (resolved == null) {
             return original;
@@ -98,5 +98,18 @@ public final class ConnectScreenHooks {
             }
             currentProxy = null;
         }
+    }
+
+    private static String formatHostPort(String host, int port) {
+        String h = stripBrackets(host);
+        return h.indexOf(':') >= 0 ? "[" + h + "]:" + port : h + ":" + port;
+    }
+
+    private static String stripBrackets(String host) {
+        String h = host == null ? "" : host.trim();
+        if (h.startsWith("[") && h.contains("]")) {
+            return h.substring(1, h.indexOf(']')).trim();
+        }
+        return h;
     }
 }

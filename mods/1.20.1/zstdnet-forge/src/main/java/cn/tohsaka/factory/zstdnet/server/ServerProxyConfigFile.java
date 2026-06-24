@@ -116,8 +116,8 @@ public final class ServerProxyConfigFile {
         String currentTarget = props.getProperty("target", DEFAULT_TARGET_HOST + ":" + DEFAULT_BACKEND_PORT);
         String listenHost = parseHost(currentListen, DEFAULT_LISTEN_HOST);
         String targetHost = parseHost(currentTarget, DEFAULT_TARGET_HOST);
-        String listenValue = listenHost + ":" + (listenPort != null ? listenPort : parsePort(currentListen, DEFAULT_ZSTD_PORT));
-        String targetValue = targetHost + ":" + (targetPort != null ? targetPort : parsePort(currentTarget, DEFAULT_BACKEND_PORT));
+        String listenValue = formatHostPort(listenHost, listenPort != null ? listenPort : parsePort(currentListen, DEFAULT_ZSTD_PORT));
+        String targetValue = formatHostPort(targetHost, targetPort != null ? targetPort : parsePort(currentTarget, DEFAULT_BACKEND_PORT));
         props.setProperty("enabled", "true");
         props.putIfAbsent("auto_takeover", "false");
         props.setProperty("listen", listenValue);
@@ -136,8 +136,8 @@ public final class ServerProxyConfigFile {
         String targetHost = parseHost(currentTarget, DEFAULT_TARGET_HOST);
         int resolvedTargetPort = targetPort != null ? targetPort : parsePort(currentTarget, DEFAULT_VOICE_CHAT_PORT);
         int resolvedListenPort = listenPort != null ? listenPort : parsePort(currentListen, DEFAULT_VOICE_CHAT_LISTEN_PORT);
-        String listenValue = listenHost + ":" + resolvedListenPort;
-        String targetValue = targetHost + ":" + resolvedTargetPort;
+        String listenValue = formatHostPort(listenHost, resolvedListenPort);
+        String targetValue = formatHostPort(targetHost, resolvedTargetPort);
         props.setProperty("voice_chat_passthrough", "true");
         props.setProperty("voice_chat_listen", listenValue);
         props.setProperty("voice_chat_target", targetValue);
@@ -155,7 +155,7 @@ public final class ServerProxyConfigFile {
 
         props.setProperty("enabled", "true");
         props.setProperty("auto_takeover", "true");
-        props.setProperty("listen", parseHost(listenHost, DEFAULT_LISTEN_HOST) + ":" + listenPort);
+        props.setProperty("listen", formatHostPort(parseHost(listenHost, DEFAULT_LISTEN_HOST), listenPort));
         props.setProperty("target", DEFAULT_TARGET_HOST + ":" + targetPort);
         writeConfigWithComments(path, props, detectLineSeparator(path));
     }
@@ -407,6 +407,17 @@ public final class ServerProxyConfigFile {
         } catch (NumberFormatException ignored) {
         }
         return fallback;
+    }
+
+    static String formatHostPort(String host, int port) {
+        String normalized = host == null ? "" : host.trim();
+        if (normalized.startsWith("[") && normalized.contains("]")) {
+            normalized = normalized.substring(1, normalized.indexOf(']')).trim();
+        }
+        if (normalized.isEmpty()) {
+            normalized = DEFAULT_LISTEN_HOST;
+        }
+        return normalized.indexOf(':') >= 0 ? "[" + normalized + "]:" + port : normalized + ":" + port;
     }
 
 }

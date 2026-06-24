@@ -256,7 +256,7 @@ final class ServerProxyRuntime {
         ProxyConfig resolved = config.withEndpoints(new HostPort(config.listen.host, port), config.target);
         ServerSocket socket = new ServerSocket();
         try {
-            socket.bind(resolved.listen.toAddress());
+            socket.bind(resolved.listen.toBindAddress());
             return new BindResult(socket, resolved);
         } catch (IOException e) {
             closeQuietly(socket);
@@ -1994,12 +1994,37 @@ final class ServerProxyRuntime {
             return new InetSocketAddress(host, port);
         }
 
+        InetSocketAddress toBindAddress() {
+            return isWildcardHost(host) ? new InetSocketAddress(port) : toAddress();
+        }
+
+        @Override
+        public String toString() {
+            return formatHostPort(host, port);
+        }
+
         private static String normalizeHost(String host) {
             String h = host.trim();
             if (h.endsWith(".") && h.length() > 1) {
                 h = h.substring(0, h.length() - 1);
             }
             return h;
+        }
+
+        private static boolean isWildcardHost(String host) {
+            if (host == null || host.isBlank()) {
+                return true;
+            }
+            String h = host.trim();
+            return "0.0.0.0".equals(h);
+        }
+
+        private static String formatHostPort(String host, int port) {
+            String h = normalizeHost(host);
+            if (h.startsWith("[") && h.contains("]")) {
+                h = h.substring(1, h.indexOf(']')).trim();
+            }
+            return h.indexOf(':') >= 0 ? "[" + h + "]:" + port : h + ":" + port;
         }
     }
 
@@ -2205,7 +2230,7 @@ final class ServerProxyRuntime {
         void start() throws IOException {
             serverSocket = new DatagramSocket(null);
             serverSocket.setReuseAddress(true);
-            serverSocket.bind(route.listen().toAddress());
+            serverSocket.bind(route.listen().toBindAddress());
             serverSocket.setSoTimeout(1000);
             running = true;
 
