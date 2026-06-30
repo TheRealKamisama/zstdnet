@@ -67,6 +67,7 @@ dependencies {
     additionalRuntimeClasspath 'com.github.luben:zstd-jni:1.5.7-7'
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'com.mojang:logging:1.2.7'
     testRuntimeOnly 'org.slf4j:slf4j-api:2.0.9'
 }
 

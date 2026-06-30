@@ -19,6 +19,7 @@
 
 package cn.tohsaka.factory.zstdnet.coremod;
 
+import cn.tohsaka.factory.zstdnet.server.ServerProxyBootstrap;
 import net.minecraft.server.MinecraftServer;
 
 public final class LanCompressionHooks {
@@ -33,5 +34,26 @@ public final class LanCompressionHooks {
             return LAN_THRESHOLD;
         }
         return VANILLA_THRESHOLD;
+    }
+
+    public static String resolveAdvertisedLanAddress(String serverAddress) {
+        int lanPort = parseLanPort(serverAddress);
+        if (lanPort <= 0) {
+            return serverAddress;
+        }
+        int zstdPort = ServerProxyBootstrap.currentLanAdvertisePort(lanPort);
+        return zstdPort > 0 ? String.valueOf(zstdPort) : serverAddress;
+    }
+
+    private static int parseLanPort(String serverAddress) {
+        if (serverAddress == null || serverAddress.isBlank()) {
+            return -1;
+        }
+        try {
+            int port = Integer.parseInt(serverAddress.trim());
+            return port >= 1 && port <= 65535 ? port : -1;
+        } catch (NumberFormatException ignored) {
+            return -1;
+        }
     }
 }

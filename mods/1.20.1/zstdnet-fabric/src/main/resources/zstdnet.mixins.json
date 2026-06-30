@@ -15,7 +15,9 @@
   "client": [
     "ConnectScreenMixin",
     "DirectJoinServerScreenMixin",
+    "IntegratedServerMixin",
     "JoinMultiplayerScreenMixin",
+    "LanServerPingerMixin",
     "ShareToLanScreenMixin"
   ],
   "injectors": {

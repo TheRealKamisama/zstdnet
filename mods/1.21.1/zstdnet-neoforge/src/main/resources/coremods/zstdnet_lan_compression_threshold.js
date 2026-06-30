@@ -92,6 +92,72 @@ function initializeCoreMod() {
                 ASMAPI.log('ERROR', '[zstdnet] failed to patch DedicatedServer#initServer for auto port takeover.');
                 return classNode;
             }
+        },
+        'zstdnet_lan_advertise_zstd_port': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.client.server.LanServerPinger'
+            },
+            'transformer': function(classNode) {
+                var mappedMethod = ASMAPI.mapMethod('createPingString');
+
+                for (var i = 0; i < classNode.methods.size(); i++) {
+                    var method = classNode.methods.get(i);
+                    if ((method.name != mappedMethod && method.name != 'createPingString' && method.name != 'a') || method.desc != '(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;') {
+                        continue;
+                    }
+
+                    var injected = new InsnList();
+                    injected.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                    injected.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        'cn/tohsaka/factory/zstdnet/coremod/LanCompressionHooks',
+                        'resolveAdvertisedLanAddress',
+                        '(Ljava/lang/String;)Ljava/lang/String;',
+                        false
+                    ));
+                    injected.add(new VarInsnNode(Opcodes.ASTORE, 1));
+                    method.instructions.insert(injected);
+                    ASMAPI.log('INFO', '[zstdnet] patched LanServerPinger#createPingString to advertise zstd LAN port.');
+                    return classNode;
+                }
+
+                ASMAPI.log('ERROR', '[zstdnet] failed to patch LanServerPinger#createPingString.');
+                return classNode;
+            }
+        },
+        'zstdnet_lan_backend_port': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.client.server.IntegratedServer'
+            },
+            'transformer': function(classNode) {
+                var mappedMethod = ASMAPI.mapMethod('publishServer');
+
+                for (var i = 0; i < classNode.methods.size(); i++) {
+                    var method = classNode.methods.get(i);
+                    if ((method.name != mappedMethod && method.name != 'publishServer' && method.name != 'a') || method.desc != '(Lnet/minecraft/world/level/GameType;ZI)Z') {
+                        continue;
+                    }
+
+                    var injected = new InsnList();
+                    injected.add(new VarInsnNode(Opcodes.ILOAD, 3));
+                    injected.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        'cn/tohsaka/factory/zstdnet/server/ServerProxyBootstrap',
+                        'resolveLanBackendPort',
+                        '(I)I',
+                        false
+                    ));
+                    injected.add(new VarInsnNode(Opcodes.ISTORE, 3));
+                    method.instructions.insert(injected);
+                    ASMAPI.log('INFO', '[zstdnet] patched IntegratedServer#publishServer to use configured LAN backend port.');
+                    return classNode;
+                }
+
+                ASMAPI.log('ERROR', '[zstdnet] failed to patch IntegratedServer#publishServer LAN backend port.');
+                return classNode;
+            }
         }
     };
 }

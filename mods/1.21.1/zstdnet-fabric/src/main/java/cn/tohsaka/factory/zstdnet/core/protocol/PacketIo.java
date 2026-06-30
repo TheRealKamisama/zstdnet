@@ -25,6 +25,35 @@ public final class PacketIo {
         }
     }
 
+    public static byte[] readPacketWire(InputStream in, int maxPayloadLength) throws IOException {
+        byte[] prefix = new byte[5];
+        int prefixLength = 0;
+        while (prefixLength < prefix.length) {
+            int next = in.read();
+            if (next < 0) {
+                throw new EOFException("eof during packet length");
+            }
+
+            prefix[prefixLength++] = (byte) next;
+            VarIntRead packetLength = VarIntCodec.read(prefix, 0, prefixLength);
+            if (packetLength == null) {
+                continue;
+            }
+
+            if (packetLength.value() < 0 || packetLength.value() > maxPayloadLength) {
+                throw new IOException("packet payload too large: " + packetLength.value());
+            }
+
+            byte[] payload = readFully(in, packetLength.value());
+            byte[] packet = new byte[prefixLength + payload.length];
+            System.arraycopy(prefix, 0, packet, 0, prefixLength);
+            System.arraycopy(payload, 0, packet, prefixLength, payload.length);
+            return packet;
+        }
+
+        throw new IOException("packet length varint too large");
+    }
+
     public static byte[] readFully(InputStream in, int length) throws IOException {
         byte[] data = new byte[length];
         int offset = 0;

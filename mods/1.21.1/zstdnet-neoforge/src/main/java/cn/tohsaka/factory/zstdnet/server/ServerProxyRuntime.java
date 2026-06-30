@@ -29,9 +29,9 @@ import cn.tohsaka.factory.zstdnet.core.protocol.VarIntRead;
 import cn.tohsaka.factory.zstdnet.core.stats.TrafficStats;
 import com.github.luben.zstd.ZstdInputStream;
 import com.github.luben.zstd.ZstdOutputStream;
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -68,8 +68,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -86,7 +90,7 @@ import java.util.concurrent.atomic.AtomicLong;
 final class ServerProxyRuntime {
     static final String ZSTD_ADDRESS_HINT = "当前服务器启用了 ZSTD 连接，请联系服务器管理员获取正确的连接地址。";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerProxyRuntime.class);
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final byte[] PROXY_V2_SIGNATURE = new byte[]{
         0x0d, 0x0a, 0x0d, 0x0a, 0x00, 0x0d, 0x0a, 0x51, 0x55, 0x49, 0x54, 0x0a
     };
@@ -99,20 +103,28 @@ final class ServerProxyRuntime {
     private static final int DEFAULT_VOICE_CHAT_LISTEN_PORT = 24455;
     private static final int DEFAULT_ZSTD_LEVEL = 9;
     private static final int DEFAULT_MAX_CONN_PER_IP = 9999;
+    private static final int DEFAULT_MAX_CONN_TOTAL = 128;
     private static final int DEFAULT_MAX_REQ_PER_WINDOW = 50;
+    private static final int DEFAULT_MAX_REQ_TOTAL_PER_WINDOW = 600;
+    private static final int DEFAULT_MAX_WORKER_THREADS = DEFAULT_MAX_CONN_TOTAL * 3;
     private static final int DEFAULT_BURST_BYTES = 256 * 1024;
     private static final Duration DEFAULT_BAN_DURATION = Duration.ofMinutes(1);
     private static final Duration DEFAULT_IDLE_TIMEOUT = Duration.ZERO;
+    private static final Duration DEFAULT_HANDSHAKE_TIMEOUT = Duration.ofSeconds(3);
+    private static final Duration DEFAULT_RAW_STATUS_TIMEOUT = Duration.ofSeconds(2);
+    private static final Duration DEFAULT_STATUS_CACHE_TTL = Duration.ofSeconds(2);
     private static final String DEFAULT_TRUSTED_PROXY_IPS = "127.0.0.1,::1,0:0:0:0:0:0:0:1";
     private static final int CLIENT_PEEK_BUFFER = 4096;
     private static final int MAX_HANDSHAKE_PACKET_SIZE = 2048;
     private static final int MAX_PROXY_V2_PAYLOAD_SIZE = 216;
+    private static final int MAX_STATUS_RESPONSE_PACKET_SIZE = 1024 * 1024;
+    private static final int MAX_STATUS_PING_PACKET_SIZE = 64;
 
     private final Object lifecycleLock = new Object();
 
     private volatile boolean running;
-    private ServerSocket listener;
-    private Thread acceptThread;
+    private List<ServerSocket> listeners = List.of();
+    private List<Thread> acceptThreads = List.of();
     private ExecutorService workers;
     private ScheduledExecutorService statsTicker;
     private FloodGuard guard;
@@ -123,6 +135,8 @@ final class ServerProxyRuntime {
     private volatile HudSnapshot latestHudSnapshot;
     private volatile long loadedConfigLastModified = Long.MIN_VALUE;
     private List<UdpForwarder> udpForwarders = List.of();
+    private Semaphore connectionSlots;
+    private volatile StatusCacheEntry statusCache;
 
     /**
      * 启动运行时。
@@ -165,7 +179,9 @@ final class ServerProxyRuntime {
             }
 
             if (mode == RuntimeMode.LAN) {
-                loaded = loaded.withTarget(new HostPort("127.0.0.1", mcServerPort));
+                if (loaded.target == null || loaded.target.port <= 0) {
+                    loaded = loaded.withTarget(new HostPort("127.0.0.1", mcServerPort));
+                }
                 loaded = loaded.withLanVoiceDefaults(mcServerPort);
             }
 
@@ -173,13 +189,14 @@ final class ServerProxyRuntime {
             if (bindResult == null) {
                 return;
             }
-            listener = bindResult.listener();
+            listeners = bindResult.listeners();
             loaded = bindResult.config();
 
             this.cfg = loaded;
             this.stats = new TrafficStats();
             this.guard = new FloodGuard(loaded);
-            this.workers = Executors.newCachedThreadPool(new NamedFactory("zstdsrv-worker"));
+            this.connectionSlots = new Semaphore(loaded.maxConnTotal);
+            this.workers = createWorkerPool(loaded);
             this.statsTicker = Executors.newSingleThreadScheduledExecutor(new NamedFactory("zstdsrv-stats"));
             this.globalLimiter = TokenBucketLimiter.create(loaded.maxRateGlobalBps, loaded.burstBytes);
             this.runtimeMode = mode;
@@ -187,9 +204,16 @@ final class ServerProxyRuntime {
             this.running = true;
 
             startStatsPrinter();
-            acceptThread = new Thread(this::acceptLoop, "zstdsrv-accept");
-            acceptThread.setDaemon(true);
-            acceptThread.start();
+            List<Thread> startedAcceptThreads = new ArrayList<>(listeners.size());
+            for (int i = 0; i < listeners.size(); i++) {
+                ServerSocket boundListener = listeners.get(i);
+                int index = i + 1;
+                Thread thread = new Thread(() -> acceptLoop(boundListener), listeners.size() == 1 ? "zstdsrv-accept" : "zstdsrv-accept-" + index);
+                thread.setDaemon(true);
+                thread.start();
+                startedAcceptThreads.add(thread);
+            }
+            acceptThreads = List.copyOf(startedAcceptThreads);
 
             startUdpForwarders(loaded);
 
@@ -213,7 +237,7 @@ final class ServerProxyRuntime {
             LOGGER.warn("[zstdnet-server] LAN listen port {} is reserved by the current LAN session, trying the next available port.", config.listen);
         } else {
             try {
-                return bindListenerOnPort(config, config.listen.port);
+                return bindListenerOnPort(config, config.listen.port, mode);
             } catch (IOException e) {
                 if (mode != RuntimeMode.LAN) {
                     LOGGER.error("[zstdnet-server] bind failed on {}: {}", config.listen, e.toString());
@@ -244,7 +268,7 @@ final class ServerProxyRuntime {
             return null;
         }
         try {
-            BindResult result = bindListenerOnPort(config, port);
+            BindResult result = bindListenerOnPort(config, port, RuntimeMode.LAN);
             LOGGER.info("[zstdnet-server] LAN listen port changed from {} to {} because the preferred port was unavailable.", config.listen.port, port);
             return result;
         } catch (IOException ignored) {
@@ -252,12 +276,49 @@ final class ServerProxyRuntime {
         }
     }
 
-    private BindResult bindListenerOnPort(ProxyConfig config, int port) throws IOException {
+    private BindResult bindListenerOnPort(ProxyConfig config, int port, RuntimeMode mode) throws IOException {
         ProxyConfig resolved = config.withEndpoints(new HostPort(config.listen.host, port), config.target);
+        return new BindResult(bindServerSockets(resolved.listen, mode), resolved);
+    }
+
+    private List<ServerSocket> bindServerSockets(HostPort listen, RuntimeMode mode) throws IOException {
+        if (mode == RuntimeMode.LAN && listen.isWildcardHost()) {
+            return bindLanWildcardServerSockets(listen.port);
+        }
+        return List.of(bindServerSocket(listen.toBindAddress()));
+    }
+
+    private List<ServerSocket> bindLanWildcardServerSockets(int port) throws IOException {
+        List<ServerSocket> sockets = new ArrayList<>(2);
+        IOException ipv6Failure = null;
+        try {
+            sockets.add(bindServerSocket(new InetSocketAddress("::", port)));
+        } catch (IOException e) {
+            ipv6Failure = e;
+        }
+
+        try {
+            sockets.add(bindServerSocket(new InetSocketAddress(port)));
+        } catch (IOException e) {
+            if (sockets.isEmpty()) {
+                if (ipv6Failure != null) {
+                    e.addSuppressed(ipv6Failure);
+                }
+                throw e;
+            }
+        }
+
+        if (sockets.isEmpty()) {
+            throw ipv6Failure == null ? new IOException("failed to bind LAN wildcard listener") : ipv6Failure;
+        }
+        return List.copyOf(sockets);
+    }
+
+    private ServerSocket bindServerSocket(InetSocketAddress address) throws IOException {
         ServerSocket socket = new ServerSocket();
         try {
-            socket.bind(resolved.listen.toBindAddress());
-            return new BindResult(socket, resolved);
+            socket.bind(address);
+            return socket;
         } catch (IOException e) {
             closeQuietly(socket);
             throw e;
@@ -289,16 +350,18 @@ final class ServerProxyRuntime {
             }
             running = false;
             stopUdpForwarders();
-            closeQuietly(listener);
-            listener = null;
-            if (acceptThread != null) {
+            for (ServerSocket boundListener : listeners) {
+                closeQuietly(boundListener);
+            }
+            listeners = List.of();
+            for (Thread acceptThread : acceptThreads) {
                 try {
                     acceptThread.join(1000);
                 } catch (InterruptedException ignored) {
                     Thread.currentThread().interrupt();
                 }
             }
-            acceptThread = null;
+            acceptThreads = List.of();
             shutdownQuietly(statsTicker);
             shutdownQuietly(workers);
             statsTicker = null;
@@ -309,6 +372,8 @@ final class ServerProxyRuntime {
             globalLimiter = null;
             runtimeMode = null;
             latestHudSnapshot = null;
+            connectionSlots = null;
+            statusCache = null;
             LOGGER.info("[zstdnet-server] stopped");
         }
     }
@@ -346,11 +411,34 @@ final class ServerProxyRuntime {
         return current > 0L && current != loadedConfigLastModified;
     }
 
-    private void acceptLoop() {
+    private void acceptLoop(ServerSocket boundListener) {
         while (running) {
             try {
-                Socket client = listener.accept();
-                workers.execute(() -> handleClient(client));
+                Socket client = boundListener.accept();
+                Semaphore slots = connectionSlots;
+                if (slots != null && !slots.tryAcquire()) {
+                    LOGGER.warn("[zstdnet-server] rejected {} because total connection limit is full", client.getRemoteSocketAddress());
+                    closeSocket(client);
+                    continue;
+                }
+
+                try {
+                    workers.execute(() -> {
+                        try {
+                            handleClient(client);
+                        } finally {
+                            if (slots != null) {
+                                slots.release();
+                            }
+                        }
+                    });
+                } catch (RejectedExecutionException e) {
+                    if (slots != null) {
+                        slots.release();
+                    }
+                    LOGGER.warn("[zstdnet-server] rejected {} because worker pool is full", client.getRemoteSocketAddress());
+                    closeSocket(client);
+                }
             } catch (IOException e) {
                 if (running) {
                     LOGGER.warn("[zstdnet-server] accept error: {}", e.toString());
@@ -363,6 +451,21 @@ final class ServerProxyRuntime {
         }
     }
 
+    private ExecutorService createWorkerPool(ProxyConfig config) {
+        int maxThreads = Math.max(8, config.maxWorkerThreads);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            0,
+            maxThreads,
+            60L,
+            TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            new NamedFactory("zstdsrv-worker"),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
+        executor.allowCoreThreadTimeOut(true);
+        return executor;
+    }
+
     /**
      * 处理单个客户端连接，建立到后端连接后执行双向转发。
      */
@@ -372,13 +475,15 @@ final class ServerProxyRuntime {
         String guardIp = remoteIp;
 
         try (Socket clientSocket = client) {
+            applyReadTimeout(clientSocket, cfg.handshakeTimeout);
             PushbackInputStream pushIn = new PushbackInputStream(clientSocket.getInputStream(), CLIENT_PEEK_BUFFER);
-            ProxyInfo proxyInfo = parseProxyProtocolV2(pushIn);
+            ProxyInfo proxyInfo = cfg.trustProxyProtocol ? parseProxyProtocolV2(pushIn) : ProxyInfo.invalid();
             String forwardedSourceIp = resolveForwardedSourceIp(remoteIp, proxyInfo);
             if (forwardedSourceIp == null) {
                 return;
             }
 
+            guardIp = forwardedSourceIp;
             if (!guard.begin(guardIp)) {
                 LOGGER.warn("[server] blocked {} by flood guard", guardIp);
                 return;
@@ -393,6 +498,14 @@ final class ServerProxyRuntime {
                     当前服务器启用了 ZSTD 连接，请联系服务器管理员获取正确的连接方式。
                     """
                 );
+                return;
+            }
+            if (clientMode.mode == ClientMode.NO_DATA) {
+                LOGGER.debug("[server] closed idle pre-handshake connection from {}", guardIp);
+                return;
+            }
+            if (clientMode.mode == ClientMode.RAW_STATUS) {
+                forwardStatusQuery(clientSocket, pushIn, clientMode.initialWireData, stats);
                 return;
             }
 
@@ -411,11 +524,7 @@ final class ServerProxyRuntime {
                 applyReadTimeout(upstream, cfg.idleTimeout);
                 TokenBucketLimiter perConnLimiter = TokenBucketLimiter.create(cfg.maxRatePerConnBps, cfg.burstBytes);
 
-                if (clientMode.mode == ClientMode.RAW_STATUS) {
-                    forwardRawPassthrough(clientSocket, pushIn, upstream, clientMode.initialWireData, stats);
-                    return;
-                }
-
+                clientSocket.setSoTimeout(0);
                 final String backendSourceIp = forwardedSourceIp;
                 Future<Exception> c2s = workers.submit(() -> {
                     try {
@@ -514,15 +623,15 @@ final class ServerProxyRuntime {
      * Detect whether the public entry is receiving a raw status ping or a zstd-wrapped play/login stream.
      */
     private DetectedClientMode detectClientMode(PushbackInputStream in) throws IOException {
-        byte[] firstPacketWire = tryReadPacketWire(in, 1500);
+        byte[] firstPacketWire = tryReadPacketWire(in, cfg.handshakeTimeout);
         if (firstPacketWire == null || firstPacketWire.length == 0) {
-            return DetectedClientMode.zstd();
+            return firstPacketWire == null ? DetectedClientMode.zstd() : new DetectedClientMode(ClientMode.NO_DATA, null);
         }
 
         byte[] firstPacket = PacketIo.extractPacketPayload(firstPacketWire);
         Integer nextState = extractHandshakeNextState(firstPacket);
         if (nextState != null && nextState == 1) {
-            byte[] secondPacketWire = tryReadPacketWire(in, 1500);
+            byte[] secondPacketWire = tryReadPacketWire(in, cfg.handshakeTimeout);
             if (secondPacketWire != null && secondPacketWire.length > 0) {
                 byte[] secondPacket = PacketIo.extractPacketPayload(secondPacketWire);
                 if (isStatusRequestPacket(secondPacket)) {
@@ -534,7 +643,7 @@ final class ServerProxyRuntime {
                 in.unread(secondPacketWire);
             }
         } else if (nextState != null && nextState == 2) {
-            byte[] secondPacketWire = tryReadPacketWire(in, 1500);
+            byte[] secondPacketWire = tryReadPacketWire(in, cfg.handshakeTimeout);
             if (secondPacketWire != null && secondPacketWire.length > 0) {
                 byte[] secondPacket = PacketIo.extractPacketPayload(secondPacketWire);
                 if (isLoginStartPacket(secondPacket)) {
@@ -546,6 +655,57 @@ final class ServerProxyRuntime {
 
         in.unread(firstPacketWire);
         return DetectedClientMode.zstd();
+    }
+
+    private void forwardStatusQuery(
+        Socket clientSocket,
+        PushbackInputStream clientIn,
+        byte[] initialWireData,
+        TrafficStats stats
+    ) throws IOException {
+        clientSocket.setSoTimeout(toSocketTimeoutMillis(cfg.rawStatusTimeout));
+
+        byte[] responseWire = resolveStatusResponse(initialWireData, stats);
+        OutputStream clientOut = clientSocket.getOutputStream();
+        clientOut.write(responseWire);
+        clientOut.flush();
+        addRawPassthroughStats(responseWire.length, stats, false);
+
+        byte[] pingWire = tryReadPacketWire(clientIn, cfg.rawStatusTimeout, MAX_STATUS_PING_PACKET_SIZE);
+        if (pingWire != null && pingWire.length > 0) {
+            byte[] pingPayload = PacketIo.extractPacketPayload(pingWire);
+            if (isStatusPingPacket(pingPayload)) {
+                clientOut.write(pingWire);
+                clientOut.flush();
+                addRawPassthroughStats(pingWire.length, stats, false);
+            }
+        }
+    }
+
+    private byte[] resolveStatusResponse(byte[] initialWireData, TrafficStats stats) throws IOException {
+        long now = System.currentTimeMillis();
+        StatusCacheEntry cached = statusCache;
+        if (cached != null && cached.expiresAtMs > now) {
+            return cached.responseWire;
+        }
+
+        try (Socket upstream = new Socket()) {
+            upstream.connect(cfg.target.toAddress(), 1500);
+            upstream.setTcpNoDelay(true);
+            upstream.setSoTimeout(toSocketTimeoutMillis(cfg.rawStatusTimeout));
+
+            OutputStream upstreamOut = upstream.getOutputStream();
+            upstreamOut.write(initialWireData);
+            upstreamOut.flush();
+            addRawPassthroughStats(initialWireData.length, stats, true);
+
+            byte[] responseWire = PacketIo.readPacketWire(upstream.getInputStream(), MAX_STATUS_RESPONSE_PACKET_SIZE);
+            long ttlMs = Math.max(0L, cfg.statusCacheTtl.toMillis());
+            if (ttlMs > 0L && responseWire.length > 0) {
+                statusCache = new StatusCacheEntry(responseWire, now + ttlMs);
+            }
+            return responseWire;
+        }
     }
 
     private void forwardRawPassthrough(
@@ -847,8 +1007,9 @@ final class ServerProxyRuntime {
     /**
      * Read the first raw Minecraft packet if it looks small enough to be a handshake; otherwise leave the stream untouched.
      */
-    private byte[] tryReadPacketWire(PushbackInputStream in, int maxWaitMillis) throws IOException {
-        long deadline = System.currentTimeMillis() + Math.max(200L, maxWaitMillis);
+    private byte[] tryReadPacketWire(PushbackInputStream in, Duration maxWait, int maxPayloadLength) throws IOException {
+        long waitMillis = Math.max(200L, maxWait == null ? DEFAULT_HANDSHAKE_TIMEOUT.toMillis() : maxWait.toMillis());
+        long deadline = System.currentTimeMillis() + waitMillis;
         byte[] prefix = new byte[5];
         int prefixLength = 0;
 
@@ -872,7 +1033,7 @@ final class ServerProxyRuntime {
                     continue;
                 }
 
-                if (packetLength.value() <= 0 || packetLength.value() > MAX_HANDSHAKE_PACKET_SIZE) {
+                if (packetLength.value() <= 0 || packetLength.value() > maxPayloadLength) {
                     in.unread(prefix, 0, prefixLength);
                     return null;
                 }
@@ -892,8 +1053,19 @@ final class ServerProxyRuntime {
         return new byte[0];
     }
 
+    private byte[] tryReadPacketWire(PushbackInputStream in, Duration maxWait) throws IOException {
+        return tryReadPacketWire(in, maxWait, MAX_HANDSHAKE_PACKET_SIZE);
+    }
+
     private boolean isStatusRequestPacket(byte[] payload) {
         return payload != null && payload.length == 1 && payload[0] == 0;
+    }
+
+    private boolean isStatusPingPacket(byte[] payload) {
+        if (payload == null || payload.length != 9) {
+            return false;
+        }
+        return payload[0] == 1;
     }
 
     private boolean isLoginStartPacket(byte[] payload) {
@@ -1197,12 +1369,18 @@ final class ServerProxyRuntime {
 
         int level = clamp(parseInt(props.getProperty("level"), DEFAULT_ZSTD_LEVEL), 1, 22);
         int maxConn = parseInt(props.getProperty("max_conn_per_ip"), DEFAULT_MAX_CONN_PER_IP);
+        int maxConnTotal = parseInt(props.getProperty("max_conn_total"), DEFAULT_MAX_CONN_TOTAL);
         int maxReq = parseInt(props.getProperty("max_req_per_window"), DEFAULT_MAX_REQ_PER_WINDOW);
+        int maxReqTotal = parseInt(props.getProperty("max_req_total_per_window"), DEFAULT_MAX_REQ_TOTAL_PER_WINDOW);
+        int maxWorkerThreads = parseInt(props.getProperty("max_worker_threads"), DEFAULT_MAX_WORKER_THREADS);
         Duration window = parseDuration(props.getProperty("request_window"), Duration.ofSeconds(10));
         Duration ban = parseDuration(props.getProperty("ban_duration"), DEFAULT_BAN_DURATION);
         Duration statsInterval = parseDuration(props.getProperty("stats_interval"), Duration.ZERO);
         Duration flushInterval = parseDuration(props.getProperty("flush_interval"), Duration.ofMillis(2));
         Duration idleTimeout = parseDuration(props.getProperty("idle_timeout"), DEFAULT_IDLE_TIMEOUT);
+        Duration handshakeTimeout = parseDuration(props.getProperty("handshake_timeout"), DEFAULT_HANDSHAKE_TIMEOUT);
+        Duration rawStatusTimeout = parseDuration(props.getProperty("raw_status_timeout"), DEFAULT_RAW_STATUS_TIMEOUT);
+        Duration statusCacheTtl = parseDuration(props.getProperty("status_cache_ttl"), DEFAULT_STATUS_CACHE_TTL);
         long maxRatePerConnBps = parseLong(props.getProperty("max_rate_per_conn_bps"), 0L);
         long maxRateGlobalBps = parseLong(props.getProperty("max_rate_global_bps"), 0L);
         int burstBytes = parseInt(props.getProperty("burst_bytes"), DEFAULT_BURST_BYTES);
@@ -1214,6 +1392,25 @@ final class ServerProxyRuntime {
         if (idleTimeout.isNegative()) {
             idleTimeout = Duration.ZERO;
         }
+        if (handshakeTimeout.isZero() || handshakeTimeout.isNegative()) {
+            handshakeTimeout = DEFAULT_HANDSHAKE_TIMEOUT;
+        }
+        if (rawStatusTimeout.isZero() || rawStatusTimeout.isNegative()) {
+            rawStatusTimeout = DEFAULT_RAW_STATUS_TIMEOUT;
+        }
+        if (statusCacheTtl.isNegative()) {
+            statusCacheTtl = Duration.ZERO;
+        }
+        if (maxConnTotal <= 0) {
+            maxConnTotal = DEFAULT_MAX_CONN_TOTAL;
+        }
+        if (maxReqTotal < 0) {
+            maxReqTotal = 0;
+        }
+        if (maxWorkerThreads <= 0) {
+            maxWorkerThreads = DEFAULT_MAX_WORKER_THREADS;
+        }
+        maxWorkerThreads = Math.max(8, Math.max(maxConnTotal, maxWorkerThreads));
         if (maxRatePerConnBps < 0) {
             maxRatePerConnBps = 0L;
         }
@@ -1234,12 +1431,18 @@ final class ServerProxyRuntime {
             voiceChatTarget,
             level,
             maxConn,
+            maxConnTotal,
             maxReq,
+            maxReqTotal,
+            maxWorkerThreads,
             window,
             ban,
             statsInterval,
             flushInterval,
             idleTimeout,
+            handshakeTimeout,
+            rawStatusTimeout,
+            statusCacheTtl,
             maxRatePerConnBps,
             maxRateGlobalBps,
             burstBytes,
@@ -1432,8 +1635,8 @@ final class ServerProxyRuntime {
             # 如果 frpc 在另一台机器，就填那台机器连接到本服务器时使用的内网 IP。
             trusted_proxy_ips=${TRUSTED_PROXY_IPS}
             """
-            .replace("${LISTEN_PORT}", String.valueOf(mcServerPort))
-            .replace("${TARGET_PORT}", String.valueOf(defaultAutoTargetPort(mcServerPort)))
+            .replace("${LISTEN_PORT}", String.valueOf(ServerProxyConfigFile.readListenPort()))
+            .replace("${TARGET_PORT}", String.valueOf(mcServerPort))
             .replace("${VOICE_PORT}", String.valueOf(mcServerPort))
             .replace("${LEVEL}", String.valueOf(DEFAULT_ZSTD_LEVEL))
             .replace("${MAX_CONN}", String.valueOf(DEFAULT_MAX_CONN_PER_IP))
@@ -1708,12 +1911,18 @@ final class ServerProxyRuntime {
         if (socket == null || timeout == null || timeout.isZero() || timeout.isNegative()) {
             return;
         }
-        long timeoutMs = Math.max(1L, timeout.toMillis());
-        int bounded = (int) Math.min((long) Integer.MAX_VALUE, timeoutMs);
         try {
-            socket.setSoTimeout(bounded);
+            socket.setSoTimeout(toSocketTimeoutMillis(timeout));
         } catch (Exception ignored) {
         }
+    }
+
+    private int toSocketTimeoutMillis(Duration timeout) {
+        if (timeout == null || timeout.isZero() || timeout.isNegative()) {
+            return 0;
+        }
+        long timeoutMs = Math.max(1L, timeout.toMillis());
+        return (int) Math.min((long) Integer.MAX_VALUE, timeoutMs);
     }
 
     private String sourceIp(SocketAddress address) {
@@ -1781,13 +1990,14 @@ final class ServerProxyRuntime {
         }
     }
 
-    private record BindResult(ServerSocket listener, ProxyConfig config) {
+    private record BindResult(List<ServerSocket> listeners, ProxyConfig config) {
     }
 
     /**
      * 服务端配置快照模块。
      */
     private enum ClientMode {
+        NO_DATA,
         ZSTD,
         RAW_STATUS,
         RAW_LOGIN
@@ -1828,6 +2038,9 @@ final class ServerProxyRuntime {
         }
     }
 
+    private record StatusCacheEntry(byte[] responseWire, long expiresAtMs) {
+    }
+
     private record ProxyConfig(
         boolean enabled,
         boolean autoTakeover,
@@ -1838,12 +2051,18 @@ final class ServerProxyRuntime {
         String voiceChatTarget,
         int level,
         int maxConnPerIp,
+        int maxConnTotal,
         int maxReqPerWindow,
+        int maxReqTotalPerWindow,
+        int maxWorkerThreads,
         Duration window,
         Duration banDuration,
         Duration statsInterval,
         Duration flushInterval,
         Duration idleTimeout,
+        Duration handshakeTimeout,
+        Duration rawStatusTimeout,
+        Duration statusCacheTtl,
         long maxRatePerConnBps,
         long maxRateGlobalBps,
         int burstBytes,
@@ -1861,12 +2080,18 @@ final class ServerProxyRuntime {
                 voiceChatTarget,
                 level,
                 maxConnPerIp,
+                maxConnTotal,
                 maxReqPerWindow,
+                maxReqTotalPerWindow,
+                maxWorkerThreads,
                 window,
                 banDuration,
                 statsInterval,
                 flushInterval,
                 idleTimeout,
+                handshakeTimeout,
+                rawStatusTimeout,
+                statusCacheTtl,
                 maxRatePerConnBps,
                 maxRateGlobalBps,
                 burstBytes,
@@ -1886,12 +2111,18 @@ final class ServerProxyRuntime {
                 voiceChatTarget,
                 level,
                 maxConnPerIp,
+                maxConnTotal,
                 maxReqPerWindow,
+                maxReqTotalPerWindow,
+                maxWorkerThreads,
                 window,
                 banDuration,
                 statsInterval,
                 flushInterval,
                 idleTimeout,
+                handshakeTimeout,
+                rawStatusTimeout,
+                statusCacheTtl,
                 maxRatePerConnBps,
                 maxRateGlobalBps,
                 burstBytes,
@@ -1919,12 +2150,18 @@ final class ServerProxyRuntime {
                 effectiveVoiceTarget,
                 level,
                 maxConnPerIp,
+                maxConnTotal,
                 maxReqPerWindow,
+                maxReqTotalPerWindow,
+                maxWorkerThreads,
                 window,
                 banDuration,
                 statsInterval,
                 flushInterval,
                 idleTimeout,
+                handshakeTimeout,
+                rawStatusTimeout,
+                statusCacheTtl,
                 maxRatePerConnBps,
                 maxRateGlobalBps,
                 burstBytes,
@@ -1995,7 +2232,16 @@ final class ServerProxyRuntime {
         }
 
         InetSocketAddress toBindAddress() {
-            return isWildcardHost(host) ? new InetSocketAddress(port) : toAddress();
+            String h = host == null ? "" : host.trim();
+            if (h.isEmpty() || "0.0.0.0".equals(h)) {
+                return new InetSocketAddress(port);
+            }
+            return isIpv6WildcardHost(h) ? new InetSocketAddress(h, port) : toAddress();
+        }
+
+        boolean isWildcardHost() {
+            String h = host == null ? "" : host.trim();
+            return h.isEmpty() || "0.0.0.0".equals(h) || isIpv6WildcardHost(h);
         }
 
         @Override
@@ -2011,12 +2257,8 @@ final class ServerProxyRuntime {
             return h;
         }
 
-        private static boolean isWildcardHost(String host) {
-            if (host == null || host.isBlank()) {
-                return true;
-            }
-            String h = host.trim();
-            return "0.0.0.0".equals(h);
+        private static boolean isIpv6WildcardHost(String host) {
+            return "::".equals(host) || "0:0:0:0:0:0:0:0".equals(host);
         }
 
         private static String formatHostPort(String host, int port) {
@@ -2035,6 +2277,8 @@ final class ServerProxyRuntime {
      */
     private static final class FloodGuard {
         private final Map<String, GuardEntry> state = new ConcurrentHashMap<>();
+        private final Deque<Long> globalRequestsMs = new ArrayDeque<>();
+        private long globalBannedUntilMs;
         private final ProxyConfig cfg;
 
         private FloodGuard(ProxyConfig cfg) {
@@ -2045,9 +2289,21 @@ final class ServerProxyRuntime {
             long now = System.currentTimeMillis();
             GuardEntry entry = state.computeIfAbsent(ip, k -> new GuardEntry());
             pruneRequests(entry, now);
+            pruneGlobalRequests(now);
 
             if (entry.bannedUntilMs > now) {
                 return false;
+            }
+            if (globalBannedUntilMs > now) {
+                return false;
+            }
+
+            if (cfg.maxReqTotalPerWindow > 0 && !cfg.window.isZero() && !cfg.window.isNegative()) {
+                globalRequestsMs.addLast(now);
+                if (globalRequestsMs.size() > cfg.maxReqTotalPerWindow) {
+                    globalBannedUntilMs = now + cfg.banDuration.toMillis();
+                    return false;
+                }
             }
 
             if (cfg.maxReqPerWindow > 0 && !cfg.window.isZero() && !cfg.window.isNegative()) {
@@ -2083,6 +2339,7 @@ final class ServerProxyRuntime {
 
         private synchronized void sweepExpired() {
             long now = System.currentTimeMillis();
+            pruneGlobalRequests(now);
             state.entrySet().removeIf(e -> {
                 GuardEntry entry = e.getValue();
                 pruneRequests(entry, now);
@@ -2098,6 +2355,17 @@ final class ServerProxyRuntime {
             long cutoff = now - cfg.window.toMillis();
             while (!entry.requestsMs.isEmpty() && entry.requestsMs.peekFirst() < cutoff) {
                 entry.requestsMs.removeFirst();
+            }
+        }
+
+        private void pruneGlobalRequests(long now) {
+            if (cfg.window.isZero() || cfg.window.isNegative()) {
+                globalRequestsMs.clear();
+                return;
+            }
+            long cutoff = now - cfg.window.toMillis();
+            while (!globalRequestsMs.isEmpty() && globalRequestsMs.peekFirst() < cutoff) {
+                globalRequestsMs.removeFirst();
             }
         }
 

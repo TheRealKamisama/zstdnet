@@ -51,6 +51,7 @@ public final class ServerProxyBootstrap {
     private static final ServerProxyRuntime RUNTIME = new ServerProxyRuntime();
     private static volatile int publishedLanPort = -1;
     private static volatile int activeLanPort = -1;
+    private static volatile int notifiedLanPort = -1;
     private static volatile long lastHudSyncMillis;
 
     private ServerProxyBootstrap() {
@@ -96,6 +97,41 @@ public final class ServerProxyBootstrap {
         );
     }
 
+    public static int resolveLanBackendPort(int requestedPort) {
+        int listenPort = ServerProxyConfigFile.readListenPort();
+        int targetPort = ServerProxyConfigFile.readTargetPort();
+        if (targetPort > 0 && targetPort != listenPort) {
+            if (targetPort != requestedPort) {
+                LOGGER.info("[zstdnet-server] LAN backend port changed from {} to configured target {}.", requestedPort, targetPort);
+            }
+            return targetPort;
+        }
+        return requestedPort;
+    }
+
+    public static int currentLanAdvertisePort(int lanPort) {
+        if (lanPort <= 0) {
+            return -1;
+        }
+        synchronized (ServerProxyBootstrap.class) {
+            if (publishedLanPort != lanPort || !RUNTIME.isLanMode() || RUNTIME.configChangedOnDisk()) {
+                publishedLanPort = lanPort;
+                if (RUNTIME.isRunning()) {
+                    LOGGER.info("[zstdnet-server] config/LAN state changed, reloading proxy before LAN advertisement.");
+                    RUNTIME.stop();
+                }
+                RUNTIME.startLan(lanPort);
+                activeLanPort = RUNTIME.isLanMode() ? lanPort : -1;
+                notifiedLanPort = -1;
+                if (activeLanPort <= 0) {
+                    publishedLanPort = -1;
+                }
+            }
+            ServerProxyRuntime.HudSnapshot snapshot = RUNTIME.hudSnapshot();
+            return RUNTIME.isLanMode() && snapshot != null ? snapshot.listenPort() : -1;
+        }
+    }
+
     /**
      * 专用服启动后启动代理运行时。
      */
@@ -122,6 +158,7 @@ public final class ServerProxyBootstrap {
     private static void onServerStopping(ServerStoppingEvent event) {
         publishedLanPort = -1;
         activeLanPort = -1;
+        notifiedLanPort = -1;
         lastHudSyncMillis = 0L;
         RUNTIME.stop();
         DedicatedServerAutoPort.clear();
@@ -162,10 +199,16 @@ public final class ServerProxyBootstrap {
                 activeLanPort = RUNTIME.isLanMode() ? lanPort : -1;
                 if (activeLanPort > 0) {
                     notifyLanProxyReady(server, lanPort);
+                    notifiedLanPort = lanPort;
                     LOGGER.info("[zstdnet-server] LAN world published on {}, zstd proxy armed.", lanPort);
                 } else {
                     LOGGER.warn("[zstdnet-server] LAN world published on {}, but zstd proxy did not start. Check zstdnet-server.properties.", lanPort);
                 }
+            }
+            if (activeLanPort > 0 && notifiedLanPort != lanPort) {
+                notifyLanProxyReady(server, lanPort);
+                notifiedLanPort = lanPort;
+                LOGGER.info("[zstdnet-server] LAN world published on {}, zstd proxy armed.", lanPort);
             }
             return;
         }
@@ -176,6 +219,7 @@ public final class ServerProxyBootstrap {
         }
         publishedLanPort = -1;
         activeLanPort = -1;
+        notifiedLanPort = -1;
     }
 
     private static void syncServerHudSnapshot(MinecraftServer server) {

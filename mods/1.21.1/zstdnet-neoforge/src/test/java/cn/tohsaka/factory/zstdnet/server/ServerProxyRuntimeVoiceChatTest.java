@@ -134,6 +134,18 @@ class ServerProxyRuntimeVoiceChatTest {
         assertTrue(address.getAddress().isAnyLocalAddress());
     }
 
+    @Test
+    void ipv6WildcardListenKeepsIpv6BindAddress() {
+        ServerProxyRuntime.HostPort endpoint = ServerProxyRuntime.HostPort.parse("[::]:25565");
+        InetSocketAddress address = endpoint.toBindAddress();
+
+        assertEquals(new ServerProxyRuntime.HostPort("::", 25565), endpoint);
+        assertEquals("[::]:25565", endpoint.toString());
+        assertEquals(25565, address.getPort());
+        assertTrue(address.getAddress().isAnyLocalAddress());
+        assertTrue(address.getAddress().getHostAddress().contains(":"));
+    }
+
     private static boolean invokeLanVoiceDefaultCheck(String methodName, String value) throws Exception {
         Class<?> proxyConfigClass = Class.forName(ServerProxyRuntime.class.getName() + "$ProxyConfig");
         Method method = proxyConfigClass.getDeclaredMethod(methodName, String.class);
