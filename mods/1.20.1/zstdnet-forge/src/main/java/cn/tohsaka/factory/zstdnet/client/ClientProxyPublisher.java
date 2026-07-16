@@ -21,6 +21,7 @@ package cn.tohsaka.factory.zstdnet.client;
 
 import cn.tohsaka.factory.zstdnet.ClientConfig;
 import cn.tohsaka.factory.zstdnet.coremod.ConnectScreenHooks;
+import cn.tohsaka.factory.zstdnet.network.LanCompressionSync;
 import cn.tohsaka.factory.zstdnet.proxy.LocalZstdNet;
 import cn.tohsaka.factory.zstdnet.server.ServerProxyBootstrap;
 import cn.tohsaka.factory.zstdnet.server.ServerProxyConfigFile;
@@ -50,6 +51,8 @@ import net.minecraft.client.server.LanServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.util.HttpUtil;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -63,6 +66,7 @@ import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.net.ServerSocket;
 import java.util.Collection;
 import java.util.List;
@@ -70,6 +74,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Client-side runtime that keeps vanilla server entries untouched and only swaps
@@ -133,6 +138,45 @@ public final class ClientProxyPublisher {
 
     public static void acceptRemoteServerHudSnapshot(ServerProxyBootstrap.ServerHudSnapshot snapshot) {
         INSTANCE.updateRemoteServerHudSnapshot(snapshot);
+    }
+
+    public static void acceptTrafficReportResponse(boolean success, String payload) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!success) {
+            sendClientMessage(Component.literal("[ZstdNet] " + payload).withStyle(ChatFormatting.RED));
+            return;
+        }
+
+        Path reportsDir = minecraft.gameDirectory.toPath().resolve("config").resolve("zstdnet").resolve("reports");
+        String serverIdentity = minecraft.getCurrentServer() == null ? "singleplayer" : minecraft.getCurrentServer().ip;
+        CompletableFuture
+            .supplyAsync(() -> {
+                try {
+                    return TrafficReportGenerator.generate(reportsDir, serverIdentity, payload);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .whenComplete((generated, error) -> minecraft.execute(() -> {
+                if (error != null) {
+                    LOGGER.error("[zstdnet-client] failed to generate local traffic report", error);
+                    Throwable cause = error;
+                    while (cause.getCause() != null) {
+                        cause = cause.getCause();
+                    }
+                    String detail = cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
+                    sendClientMessage(Component.literal("[ZstdNet] 本地统计面板生成失败：" + detail).withStyle(ChatFormatting.RED));
+                    return;
+                }
+                String path = generated.latest().toString();
+                Component open = Component.literal("[打开统计面板]").withStyle(style -> style
+                    .withColor(ChatFormatting.AQUA)
+                    .withUnderlined(true)
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(path))));
+                sendClientMessage(Component.literal("[ZstdNet] 报告已保存 ").withStyle(ChatFormatting.GRAY).append(open));
+                sendClientMessage(Component.literal(generated.archive().toString()).withStyle(ChatFormatting.DARK_GRAY));
+            }));
     }
 
     private void onScreenInit(ScreenEvent.Init.Post event) {
@@ -328,6 +372,27 @@ public final class ClientProxyPublisher {
                 .then(Commands.literal("toggle").executes(this::toggleHudVisible))
         );
         event.getDispatcher().register(buildPortCommand("zstdport"));
+        event.getDispatcher().register(buildTrafficReportCommand());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> buildTrafficReportCommand() {
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("zstdreport")
+            .executes(context -> requestTrafficReport("today"));
+        for (String range : List.of("today", "session", "24h", "7d", "30d")) {
+            command.then(Commands.literal(range).executes(context -> requestTrafficReport(range)));
+        }
+        return command;
+    }
+
+    private int requestTrafficReport(String range) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.getConnection() == null) {
+            sendClientMessage(Component.literal("[ZstdNet] 请先进入安装了 ZstdNet 的服务器。").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        LanCompressionSync.requestTrafficReport(range);
+        sendClientMessage(Component.literal("[ZstdNet] 正在请求 " + range + " 流量报告…").withStyle(ChatFormatting.GRAY));
+        return 1;
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> buildPortCommand(String literal) {

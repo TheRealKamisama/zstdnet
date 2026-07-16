@@ -19,6 +19,13 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+sourceSets {
+    main {
+        java.srcDir '../../../shared/src/main/java'
+        resources.srcDir '../../../shared/src/main/resources'
+    }
+}
+
 neoForge {
     version = neo_version
 
@@ -69,6 +76,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'com.mojang:logging:1.2.7'
     testRuntimeOnly 'org.slf4j:slf4j-api:2.0.9'
+    testRuntimeOnly 'com.google.code.gson:gson:2.11.0'
 }
 
 tasks.withType(JavaCompile).configureEach {

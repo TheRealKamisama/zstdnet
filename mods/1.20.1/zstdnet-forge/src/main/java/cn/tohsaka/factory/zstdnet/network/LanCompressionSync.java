@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 
 public final class LanCompressionSync {
     public static final int LAN_THRESHOLD = 1048576;
+    private static final int MAX_REPORT_BYTES = 1024 * 1024;
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String PROTOCOL_VERSION = "1";
@@ -80,6 +81,16 @@ public final class LanCompressionSync {
             .decoder(ServerHudMessage::decode)
             .consumerMainThread(ServerHudMessage::handle)
             .add();
+        CHANNEL.messageBuilder(TrafficReportRequestMessage.class, id++, NetworkDirection.PLAY_TO_SERVER)
+            .encoder(TrafficReportRequestMessage::encode)
+            .decoder(TrafficReportRequestMessage::decode)
+            .consumerMainThread(TrafficReportRequestMessage::handle)
+            .add();
+        CHANNEL.messageBuilder(TrafficReportResponseMessage.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+            .encoder(TrafficReportResponseMessage::encode)
+            .decoder(TrafficReportResponseMessage::decode)
+            .consumerMainThread(TrafficReportResponseMessage::handle)
+            .add();
     }
 
     public static void requestCompressionUpgrade(ServerPlayer player) {
@@ -98,6 +109,11 @@ public final class LanCompressionSync {
         }
         init();
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), ServerHudMessage.from(snapshot));
+    }
+
+    public static void requestTrafficReport(String range) {
+        init();
+        CHANNEL.sendToServer(new TrafficReportRequestMessage(range));
     }
 
     private static void applyClientThreshold(int threshold) {
@@ -163,6 +179,55 @@ public final class LanCompressionSync {
 
         private static void handle(ActivateMessage message, Supplier<NetworkEvent.Context> supplier) {
             supplier.get().enqueueWork(() -> applyClientThreshold(message.threshold));
+            supplier.get().setPacketHandled(true);
+        }
+    }
+
+    private record TrafficReportRequestMessage(String range) {
+        private static TrafficReportRequestMessage decode(FriendlyByteBuf buf) {
+            return new TrafficReportRequestMessage(buf.readUtf(16));
+        }
+
+        private static void encode(TrafficReportRequestMessage message, FriendlyByteBuf buf) {
+            buf.writeUtf(message.range, 16);
+        }
+
+        private static void handle(TrafficReportRequestMessage message, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context context = supplier.get();
+            context.enqueueWork(() -> {
+                ServerPlayer player = context.getSender();
+                if (player == null) {
+                    return;
+                }
+                TrafficReportResponseMessage response;
+                if (!player.hasPermissions(2)) {
+                    response = new TrafficReportResponseMessage(false, "需要服务器管理员权限才能导出流量报告。");
+                } else {
+                    try {
+                        response = new TrafficReportResponseMessage(true, ServerProxyBootstrap.buildTrafficReport(message.range));
+                    } catch (RuntimeException e) {
+                        LOGGER.warn("[zstdnet-server] failed to build traffic report for {}: {}", player.getGameProfile().getName(), e.toString());
+                        response = new TrafficReportResponseMessage(false, "服务器生成流量报告失败：" + e.getMessage());
+                    }
+                }
+                CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), response);
+            });
+            context.setPacketHandled(true);
+        }
+    }
+
+    private record TrafficReportResponseMessage(boolean success, String payload) {
+        private static TrafficReportResponseMessage decode(FriendlyByteBuf buf) {
+            return new TrafficReportResponseMessage(buf.readBoolean(), buf.readUtf(MAX_REPORT_BYTES));
+        }
+
+        private static void encode(TrafficReportResponseMessage message, FriendlyByteBuf buf) {
+            buf.writeBoolean(message.success);
+            buf.writeUtf(message.payload, MAX_REPORT_BYTES);
+        }
+
+        private static void handle(TrafficReportResponseMessage message, Supplier<NetworkEvent.Context> supplier) {
+            supplier.get().enqueueWork(() -> ClientProxyPublisher.acceptTrafficReportResponse(message.success, message.payload));
             supplier.get().setPacketHandled(true);
         }
     }

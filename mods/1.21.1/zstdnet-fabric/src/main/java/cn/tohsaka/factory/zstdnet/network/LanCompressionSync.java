@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 
 public final class LanCompressionSync {
     public static final int LAN_THRESHOLD = 1048576;
+    private static final int MAX_REPORT_BYTES = 1024 * 1024;
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
@@ -56,6 +57,8 @@ public final class LanCompressionSync {
         PayloadTypeRegistry.playC2S().register(ReadyMessage.TYPE, ReadyMessage.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ActivateMessage.TYPE, ActivateMessage.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ServerHudMessage.TYPE, ServerHudMessage.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(TrafficReportRequestMessage.TYPE, TrafficReportRequestMessage.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(TrafficReportResponseMessage.TYPE, TrafficReportResponseMessage.STREAM_CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(ReadyMessage.TYPE, (message, context) -> {
             context.server().execute(() -> {
@@ -67,6 +70,24 @@ public final class LanCompressionSync {
                     message.threshold(),
                     player.getGameProfile().getName()
                 );
+            });
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(TrafficReportRequestMessage.TYPE, (message, context) -> {
+            context.server().execute(() -> {
+                ServerPlayer player = context.player();
+                TrafficReportResponseMessage response;
+                if (!player.hasPermissions(2)) {
+                    response = new TrafficReportResponseMessage(false, "需要服务器管理员权限才能导出流量报告。");
+                } else {
+                    try {
+                        response = new TrafficReportResponseMessage(true, ServerProxyBootstrap.buildTrafficReport(message.range()));
+                    } catch (RuntimeException e) {
+                        LOGGER.warn("[zstdnet-server] failed to build traffic report for {}: {}", player.getGameProfile().getName(), e.toString());
+                        response = new TrafficReportResponseMessage(false, "服务器生成流量报告失败：" + e.getMessage());
+                    }
+                }
+                ServerPlayNetworking.send(player, response);
             });
         });
     }
@@ -87,6 +108,10 @@ public final class LanCompressionSync {
         ClientPlayNetworking.registerGlobalReceiver(ServerHudMessage.TYPE, (message, context) -> {
             context.client().execute(() -> ClientProxyPublisher.acceptRemoteServerHudSnapshot(message.toSnapshot()));
         });
+
+        ClientPlayNetworking.registerGlobalReceiver(TrafficReportResponseMessage.TYPE, (message, context) -> {
+            context.client().execute(() -> ClientProxyPublisher.acceptTrafficReportResponse(message.success(), message.payload()));
+        });
     }
 
     public static void requestCompressionUpgrade(ServerPlayer player) {
@@ -103,6 +128,10 @@ public final class LanCompressionSync {
             return;
         }
         ServerPlayNetworking.send(player, ServerHudMessage.from(snapshot));
+    }
+
+    public static void requestTrafficReport(String range) {
+        ClientPlayNetworking.send(new TrafficReportRequestMessage(range));
     }
 
     private static void applyClientThreshold(int threshold) {
@@ -155,6 +184,37 @@ public final class LanCompressionSync {
 
         @Override
         public Type<ActivateMessage> type() {
+            return TYPE;
+        }
+    }
+
+    private record TrafficReportRequestMessage(String range) implements CustomPacketPayload {
+        private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Zstdnet.MODID, "traffic_report_request");
+        private static final Type<TrafficReportRequestMessage> TYPE = new Type<>(ID);
+        private static final StreamCodec<RegistryFriendlyByteBuf, TrafficReportRequestMessage> STREAM_CODEC = StreamCodec.of(
+            (buf, message) -> buf.writeUtf(message.range, 16),
+            buf -> new TrafficReportRequestMessage(buf.readUtf(16))
+        );
+
+        @Override
+        public Type<TrafficReportRequestMessage> type() {
+            return TYPE;
+        }
+    }
+
+    private record TrafficReportResponseMessage(boolean success, String payload) implements CustomPacketPayload {
+        private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Zstdnet.MODID, "traffic_report_response");
+        private static final Type<TrafficReportResponseMessage> TYPE = new Type<>(ID);
+        private static final StreamCodec<RegistryFriendlyByteBuf, TrafficReportResponseMessage> STREAM_CODEC = StreamCodec.of(
+            (buf, message) -> {
+                buf.writeBoolean(message.success);
+                buf.writeUtf(message.payload, MAX_REPORT_BYTES);
+            },
+            buf -> new TrafficReportResponseMessage(buf.readBoolean(), buf.readUtf(MAX_REPORT_BYTES))
+        );
+
+        @Override
+        public Type<TrafficReportResponseMessage> type() {
             return TYPE;
         }
     }

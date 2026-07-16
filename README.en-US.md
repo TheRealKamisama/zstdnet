@@ -43,6 +43,26 @@ It is recommended to install this mod on both the client and the server.
 - When using the built-in Zstd server entry: the server needs it
 - When opening a LAN world and sharing a Zstd entry externally: the host client needs it
 
+## Local Traffic Dashboard
+
+The server automatically stores daily totals, five-minute time series, and per-run history. TCP, UDP, ingress, egress, raw bytes, and wire bytes are tracked separately under `config/zstdnet/stats/`.
+
+Players with command permission level 2 can request a report from a modded client:
+
+```text
+/zstdreport today
+/zstdreport session
+/zstdreport 24h
+/zstdreport 7d
+/zstdreport 30d
+```
+
+The server returns only aggregated JSON over the game connection. The client generates a self-contained HTML file under `.minecraft/config/zstdnet/reports/` and adds a clickable "Open traffic dashboard" message in chat.
+
+The report page provides All, 1-hour, 6-hour, and 12-hour filters plus any custom start and end inside the report. A `/zstdreport 30d` report also provides 1-day and 7-day filters. The trend chart, traffic summaries, direction split, and bandwidth reference update together.
+
+The dashboard supports dark and light modes plus ten color presets: Default, Minimal Mono, Midnight, Rose Garden, Aurora, Sunset Glow, Forest Whisper, Sea Breeze, and Lavender Dream. Every preset uses a high-contrast ingress/egress pair. Bandwidth reference values are shown in both `KiB/s` and `Mbps`, where `1 Mbps = 1,000,000 bit/s`. Theme choices are stored locally by the browser.
+
 ## How Players Connect
 
 If the server owner uses the default recommended `auto_takeover=true` setup, players usually keep using the same public address and port they already know. They do not need to learn a second port just for ZstdNet.

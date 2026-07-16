@@ -25,7 +25,9 @@ sourceSets {
     main {
         java {
             srcDir '../zstdnet-forge/src/main/java'
+            srcDir '../../../shared/src/main/java'
         }
+        resources.srcDir '../../../shared/src/main/resources'
     }
     test {
         java {

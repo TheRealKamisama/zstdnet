@@ -121,6 +121,7 @@ final class ServerProxyRuntime {
     private static final int MAX_STATUS_PING_PACKET_SIZE = 64;
 
     private final Object lifecycleLock = new Object();
+    private final TrafficStats persistentStats;
 
     private volatile boolean running;
     private List<ServerSocket> listeners = List.of();
@@ -137,6 +138,14 @@ final class ServerProxyRuntime {
     private List<UdpForwarder> udpForwarders = List.of();
     private Semaphore connectionSlots;
     private volatile StatusCacheEntry statusCache;
+
+    ServerProxyRuntime() {
+        this(new TrafficStats());
+    }
+
+    ServerProxyRuntime(TrafficStats persistentStats) {
+        this.persistentStats = Objects.requireNonNull(persistentStats, "persistentStats");
+    }
 
     /**
      * 启动运行时。
@@ -193,7 +202,7 @@ final class ServerProxyRuntime {
             loaded = bindResult.config();
 
             this.cfg = loaded;
-            this.stats = new TrafficStats();
+            this.stats = persistentStats;
             this.guard = new FloodGuard(loaded);
             this.connectionSlots = new Semaphore(loaded.maxConnTotal);
             this.workers = createWorkerPool(loaded);
@@ -476,7 +485,11 @@ final class ServerProxyRuntime {
 
         try (Socket clientSocket = client) {
             applyReadTimeout(clientSocket, cfg.handshakeTimeout);
-            PushbackInputStream pushIn = new PushbackInputStream(clientSocket.getInputStream(), CLIENT_PEEK_BUFFER);
+            OutputStream clientWireOut = new CountingOutputStream(clientSocket.getOutputStream(), stats::addZstdDown);
+            PushbackInputStream pushIn = new PushbackInputStream(
+                new CountingInputStream(clientSocket.getInputStream(), stats::addZstdUp),
+                CLIENT_PEEK_BUFFER
+            );
             ProxyInfo proxyInfo = cfg.trustProxyProtocol ? parseProxyProtocolV2(pushIn) : ProxyInfo.invalid();
             String forwardedSourceIp = resolveForwardedSourceIp(remoteIp, proxyInfo);
             if (forwardedSourceIp == null) {
@@ -491,9 +504,11 @@ final class ServerProxyRuntime {
 
             DetectedClientMode clientMode = detectClientMode(pushIn);
             if (clientMode.mode == ClientMode.RAW_LOGIN) {
+                stats.addRawUp(clientMode.initialWireData == null ? 0 : clientMode.initialWireData.length);
                 LOGGER.warn("[server] rejected raw login attempt from {} on zstd-only entry", guardIp);
                 sendLoginDisconnect(
-                    clientSocket,
+                    clientWireOut,
+                    stats,
                     """
                     当前服务器启用了 ZSTD 连接，请联系服务器管理员获取正确的连接方式。
                     """
@@ -505,7 +520,8 @@ final class ServerProxyRuntime {
                 return;
             }
             if (clientMode.mode == ClientMode.RAW_STATUS) {
-                forwardStatusQuery(clientSocket, pushIn, clientMode.initialWireData, stats);
+                stats.addRawUp(clientMode.initialWireData == null ? 0 : clientMode.initialWireData.length);
+                forwardStatusQuery(clientSocket, clientWireOut, pushIn, clientMode.initialWireData, stats);
                 return;
             }
 
@@ -539,7 +555,7 @@ final class ServerProxyRuntime {
 
                 Future<Exception> s2c = workers.submit(() -> {
                     try {
-                        forwardCompress(clientSocket.getOutputStream(), upstream, cfg.level, cfg.flushInterval, stats, perConnLimiter, globalLimiter);
+                        forwardCompress(clientWireOut, upstream, cfg.level, cfg.flushInterval, stats, perConnLimiter, globalLimiter);
                         return null;
                     } catch (Exception ex) {
                         return ex;
@@ -659,30 +675,31 @@ final class ServerProxyRuntime {
 
     private void forwardStatusQuery(
         Socket clientSocket,
+        OutputStream clientOut,
         PushbackInputStream clientIn,
         byte[] initialWireData,
         TrafficStats stats
     ) throws IOException {
         clientSocket.setSoTimeout(toSocketTimeoutMillis(cfg.rawStatusTimeout));
 
-        byte[] responseWire = resolveStatusResponse(initialWireData, stats);
-        OutputStream clientOut = clientSocket.getOutputStream();
+        byte[] responseWire = resolveStatusResponse(initialWireData);
         clientOut.write(responseWire);
         clientOut.flush();
-        addRawPassthroughStats(responseWire.length, stats, false);
+        stats.addRawDown(responseWire.length);
 
         byte[] pingWire = tryReadPacketWire(clientIn, cfg.rawStatusTimeout, MAX_STATUS_PING_PACKET_SIZE);
         if (pingWire != null && pingWire.length > 0) {
+            stats.addRawUp(pingWire.length);
             byte[] pingPayload = PacketIo.extractPacketPayload(pingWire);
             if (isStatusPingPacket(pingPayload)) {
                 clientOut.write(pingWire);
                 clientOut.flush();
-                addRawPassthroughStats(pingWire.length, stats, false);
+                stats.addRawDown(pingWire.length);
             }
         }
     }
 
-    private byte[] resolveStatusResponse(byte[] initialWireData, TrafficStats stats) throws IOException {
+    private byte[] resolveStatusResponse(byte[] initialWireData) throws IOException {
         long now = System.currentTimeMillis();
         StatusCacheEntry cached = statusCache;
         if (cached != null && cached.expiresAtMs > now) {
@@ -697,7 +714,6 @@ final class ServerProxyRuntime {
             OutputStream upstreamOut = upstream.getOutputStream();
             upstreamOut.write(initialWireData);
             upstreamOut.flush();
-            addRawPassthroughStats(initialWireData.length, stats, true);
 
             byte[] responseWire = PacketIo.readPacketWire(upstream.getInputStream(), MAX_STATUS_RESPONSE_PACKET_SIZE);
             long ttlMs = Math.max(0L, cfg.statusCacheTtl.toMillis());
@@ -746,7 +762,7 @@ final class ServerProxyRuntime {
      * Client -> backend: decompress zstd traffic before forwarding to Minecraft.
      */
     private void forwardDecompress(Socket dst, InputStream src, TrafficStats stats, String sourceIp) throws IOException {
-        try (ZstdInputStream zstdIn = new ZstdInputStream(new CountingInputStream(src, stats::addZstdUp))) {
+        try (ZstdInputStream zstdIn = new ZstdInputStream(src)) {
             OutputStream dstOut = dst.getOutputStream();
             byte[] firstPacket = PacketIo.readPacket(zstdIn);
             if (firstPacket.length > 0) {
@@ -865,7 +881,7 @@ final class ServerProxyRuntime {
         TokenBucketLimiter globalLimiter
     ) throws IOException {
         OutputStream limitedDst = new RateLimitedOutputStream(dst, perConnLimiter, globalLimiter);
-        try (ZstdOutputStream zstdOut = new ZstdOutputStream(new CountingOutputStream(limitedDst, stats::addZstdDown), level)) {
+        try (ZstdOutputStream zstdOut = new ZstdOutputStream(limitedDst, level)) {
             zstdOut.setCloseFrameOnFlush(false);
             InputStream srcIn = src.getInputStream();
             byte[] buf = new byte[16 * 1024];
@@ -1132,16 +1148,16 @@ final class ServerProxyRuntime {
         return nextState.value();
     }
 
-    private void sendLoginDisconnect(Socket clientSocket, String message) {
-        if (clientSocket == null || message == null || message.isBlank()) {
+    private void sendLoginDisconnect(OutputStream out, TrafficStats stats, String message) {
+        if (out == null || stats == null || message == null || message.isBlank()) {
             return;
         }
 
         try {
-            OutputStream out = clientSocket.getOutputStream();
             byte[] packet = buildLoginDisconnectPacket(message);
             out.write(packet);
             out.flush();
+            stats.addRawDown(packet.length);
         } catch (IOException e) {
             LOGGER.debug("[server] failed to send raw-login disconnect packet: {}", e.toString());
         }
@@ -2437,7 +2453,7 @@ final class ServerProxyRuntime {
         List<UdpForwarder> started = new ArrayList<>();
         for (UdpRoute route : routes) {
             try {
-                UdpForwarder forwarder = new UdpForwarder(route);
+                UdpForwarder forwarder = new UdpForwarder(route, stats);
                 forwarder.start();
                 started.add(forwarder);
                 LOGGER.info("[zstdnet-server] UDP route armed [{}]: {} -> {}", route.label(), route.listen(), route.target());
@@ -2486,13 +2502,15 @@ final class ServerProxyRuntime {
         private static final long SESSION_TIMEOUT_MS = 60_000L;
 
         private final UdpRoute route;
+        private final TrafficStats stats;
         private volatile boolean running;
         private DatagramSocket serverSocket;
         private Thread forwardThread;
         private final Map<SocketAddress, UdpSession> sessions = new ConcurrentHashMap<>();
 
-        UdpForwarder(UdpRoute route) {
+        UdpForwarder(UdpRoute route, TrafficStats stats) {
             this.route = route;
+            this.stats = stats;
         }
 
         void start() throws IOException {
@@ -2539,6 +2557,11 @@ final class ServerProxyRuntime {
                         sweepIfNeeded(lastSweep);
                         lastSweep = System.currentTimeMillis();
                         continue;
+                    }
+
+                    TrafficStats currentStats = stats;
+                    if (currentStats != null) {
+                        currentStats.addUdpIngress(packet.getLength());
                     }
 
                     SocketAddress clientAddr = packet.getSocketAddress();
@@ -2602,6 +2625,10 @@ final class ServerProxyRuntime {
                     System.arraycopy(packet.getData(), packet.getOffset(), data, 0, packet.getLength());
                     DatagramPacket returnPacket = new DatagramPacket(data, data.length, (InetSocketAddress) session.clientAddr);
                     serverSocket.send(returnPacket);
+                    TrafficStats currentStats = stats;
+                    if (currentStats != null) {
+                        currentStats.addUdpEgress(data.length);
+                    }
                 } catch (IOException e) {
                     if (running && !session.socket.isClosed()) {
                         LOGGER.debug("[zstdnet-server] UDP return error [{}] for {}: {}", route.label(), session.clientAddr, e.toString());

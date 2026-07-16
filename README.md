@@ -40,6 +40,10 @@ online-mode=false
 然后正常启动服务器即可体验带宽压缩。公网直连、局域网、虚拟局域网、FRP / 反代等详细配置请看 [中文完整文档](README.zh-CN.md)。
 有正版验证需求，可以额外搭配 [TrueUUID（正版离线共存）](https://www.curseforge.com/minecraft/mc-mods/trueuuid)。使用/zstdhud on指令可以查看压缩状态。
 
+### 本地流量统计面板
+
+拥有 2 级命令权限的玩家可使用 `/zstdreport today|session|24h|7d|30d` 生成自包含 HTML 面板。面板支持时间筛选、深浅模式、10 套主题色以及 `KiB/s` / `Mbps` 带宽参考；详细说明见 [中文完整文档](README.zh-CN.md#本地流量统计面板) 和 [面板设计文档](docs/design/zstdnet-report-dashboard.md)。
+
 # curseforge
 
 - https://www.curseforge.com/minecraft/mc-mods/zstdnet

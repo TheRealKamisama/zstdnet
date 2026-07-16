@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public final class LanCompressionSync {
     public static final int LAN_THRESHOLD = 1048576;
+    private static final int MAX_REPORT_BYTES = 1024 * 1024;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LanCompressionSync.class);
     private static final String PROTOCOL_VERSION = "1";
@@ -61,6 +62,8 @@ public final class LanCompressionSync {
         registrar.playToServer(ReadyMessage.TYPE, ReadyMessage.STREAM_CODEC, ReadyMessage::handle);
         registrar.playToClient(ActivateMessage.TYPE, ActivateMessage.STREAM_CODEC, ActivateMessage::handle);
         registrar.playToClient(ServerHudMessage.TYPE, ServerHudMessage.STREAM_CODEC, ServerHudMessage::handle);
+        registrar.playToServer(TrafficReportRequestMessage.TYPE, TrafficReportRequestMessage.STREAM_CODEC, TrafficReportRequestMessage::handle);
+        registrar.playToClient(TrafficReportResponseMessage.TYPE, TrafficReportResponseMessage.STREAM_CODEC, TrafficReportResponseMessage::handle);
     }
 
     public static void requestCompressionUpgrade(ServerPlayer player) {
@@ -77,6 +80,10 @@ public final class LanCompressionSync {
             return;
         }
         PacketDistributor.sendToPlayer(player, ServerHudMessage.from(snapshot));
+    }
+
+    public static void requestTrafficReport(String range) {
+        PacketDistributor.sendToServer(new TrafficReportRequestMessage(range));
     }
 
     private static void applyClientThreshold(int threshold) {
@@ -155,6 +162,61 @@ public final class LanCompressionSync {
 
         private static void handle(ActivateMessage message, IPayloadContext context) {
             context.enqueueWork(() -> applyClientThreshold(message.threshold));
+        }
+    }
+
+    private record TrafficReportRequestMessage(String range) implements CustomPacketPayload {
+        private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Zstdnet.MODID, "traffic_report_request");
+        private static final Type<TrafficReportRequestMessage> TYPE = new Type<>(ID);
+        private static final StreamCodec<RegistryFriendlyByteBuf, TrafficReportRequestMessage> STREAM_CODEC = StreamCodec.of(
+            (buf, message) -> buf.writeUtf(message.range, 16),
+            buf -> new TrafficReportRequestMessage(buf.readUtf(16))
+        );
+
+        @Override
+        public Type<TrafficReportRequestMessage> type() {
+            return TYPE;
+        }
+
+        private static void handle(TrafficReportRequestMessage message, IPayloadContext context) {
+            context.enqueueWork(() -> {
+                if (!(context.player() instanceof ServerPlayer player)) {
+                    return;
+                }
+                TrafficReportResponseMessage response;
+                if (!player.hasPermissions(2)) {
+                    response = new TrafficReportResponseMessage(false, "需要服务器管理员权限才能导出流量报告。");
+                } else {
+                    try {
+                        response = new TrafficReportResponseMessage(true, ServerProxyBootstrap.buildTrafficReport(message.range));
+                    } catch (RuntimeException e) {
+                        LOGGER.warn("[zstdnet-server] failed to build traffic report for {}: {}", player.getGameProfile().getName(), e.toString());
+                        response = new TrafficReportResponseMessage(false, "服务器生成流量报告失败：" + e.getMessage());
+                    }
+                }
+                PacketDistributor.sendToPlayer(player, response);
+            });
+        }
+    }
+
+    private record TrafficReportResponseMessage(boolean success, String payload) implements CustomPacketPayload {
+        private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Zstdnet.MODID, "traffic_report_response");
+        private static final Type<TrafficReportResponseMessage> TYPE = new Type<>(ID);
+        private static final StreamCodec<RegistryFriendlyByteBuf, TrafficReportResponseMessage> STREAM_CODEC = StreamCodec.of(
+            (buf, message) -> {
+                buf.writeBoolean(message.success);
+                buf.writeUtf(message.payload, MAX_REPORT_BYTES);
+            },
+            buf -> new TrafficReportResponseMessage(buf.readBoolean(), buf.readUtf(MAX_REPORT_BYTES))
+        );
+
+        @Override
+        public Type<TrafficReportResponseMessage> type() {
+            return TYPE;
+        }
+
+        private static void handle(TrafficReportResponseMessage message, IPayloadContext context) {
+            context.enqueueWork(() -> ClientProxyPublisher.acceptTrafficReportResponse(message.success, message.payload));
         }
     }
 

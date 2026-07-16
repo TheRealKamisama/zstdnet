@@ -19,6 +19,8 @@
 
 package cn.tohsaka.factory.zstdnet.server;
 
+import cn.tohsaka.factory.zstdnet.core.stats.TrafficStatisticsService;
+import cn.tohsaka.factory.zstdnet.core.stats.TrafficStats;
 import cn.tohsaka.factory.zstdnet.coremod.ServerRealIpHooks;
 import cn.tohsaka.factory.zstdnet.mixin.ServerGamePacketListenerImplAccessor;
 import cn.tohsaka.factory.zstdnet.network.LanCompressionSync;
@@ -37,6 +39,7 @@ import org.slf4j.Logger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -45,7 +48,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class ServerProxyBootstrap {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean(false);
-    private static final ServerProxyRuntime RUNTIME = new ServerProxyRuntime();
+    private static final TrafficStats TRAFFIC_STATS = new TrafficStats();
+    private static final TrafficStatisticsService TRAFFIC_HISTORY = new TrafficStatisticsService(
+        ServerProxyConfigFile.path().getParent().resolve("zstdnet").resolve("stats"),
+        ZoneId.systemDefault(),
+        TRAFFIC_STATS
+    );
+    private static final ServerProxyRuntime RUNTIME = new ServerProxyRuntime(TRAFFIC_STATS);
     private static volatile int publishedLanPort = -1;
     private static volatile int activeLanPort = -1;
     private static volatile int notifiedLanPort = -1;
@@ -91,6 +100,13 @@ public final class ServerProxyBootstrap {
         );
     }
 
+    public static String buildTrafficReport(String range) {
+        ServerProxyRuntime.HudSnapshot snapshot = RUNTIME.hudSnapshot();
+        String mode = snapshot == null ? "inactive" : snapshot.modeName();
+        String listen = snapshot == null ? "" : snapshot.listenHost() + ":" + snapshot.listenPort();
+        return TRAFFIC_HISTORY.buildReportJson(range, mode, listen);
+    }
+
     public static int resolveLanBackendPort(int requestedPort) {
         int listenPort = ServerProxyConfigFile.readListenPort();
         int targetPort = ServerProxyConfigFile.readTargetPort();
@@ -127,6 +143,7 @@ public final class ServerProxyBootstrap {
     }
 
     private static void onServerStarted(MinecraftServer server) {
+        TRAFFIC_HISTORY.startSession();
         if (!server.isDedicatedServer()) {
             return;
         }
@@ -149,6 +166,7 @@ public final class ServerProxyBootstrap {
         notifiedLanPort = -1;
         lastHudSyncMillis = 0L;
         RUNTIME.stop();
+        TRAFFIC_HISTORY.stopSession();
         DedicatedServerAutoPort.clear();
     }
 

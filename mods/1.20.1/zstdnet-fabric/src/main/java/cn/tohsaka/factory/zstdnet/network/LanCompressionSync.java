@@ -37,12 +37,15 @@ import org.slf4j.Logger;
 
 public final class LanCompressionSync {
     public static final int LAN_THRESHOLD = 1048576;
+    private static final int MAX_REPORT_BYTES = 1024 * 1024;
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ResourceLocation PREPARE_ID = new ResourceLocation(Zstdnet.MODID, "lan_compression_prepare");
     private static final ResourceLocation READY_ID = new ResourceLocation(Zstdnet.MODID, "lan_compression_ready");
     private static final ResourceLocation ACTIVATE_ID = new ResourceLocation(Zstdnet.MODID, "lan_compression_activate");
     private static final ResourceLocation SERVER_HUD_ID = new ResourceLocation(Zstdnet.MODID, "server_hud");
+    private static final ResourceLocation TRAFFIC_REPORT_REQUEST_ID = new ResourceLocation(Zstdnet.MODID, "traffic_report_request");
+    private static final ResourceLocation TRAFFIC_REPORT_RESPONSE_ID = new ResourceLocation(Zstdnet.MODID, "traffic_report_response");
 
     private static boolean initialized;
     private static boolean clientInitialized;
@@ -71,6 +74,27 @@ public final class LanCompressionSync {
                 );
             });
         });
+
+        ServerPlayNetworking.registerGlobalReceiver(TRAFFIC_REPORT_REQUEST_ID, (server, player, handler, buf, responseSender) -> {
+            String range = buf.readUtf(16);
+            server.execute(() -> {
+                FriendlyByteBuf response = PacketByteBufs.create();
+                if (!player.hasPermissions(2)) {
+                    response.writeBoolean(false);
+                    response.writeUtf("需要服务器管理员权限才能导出流量报告。", MAX_REPORT_BYTES);
+                } else {
+                    try {
+                        response.writeBoolean(true);
+                        response.writeUtf(ServerProxyBootstrap.buildTrafficReport(range), MAX_REPORT_BYTES);
+                    } catch (RuntimeException e) {
+                        LOGGER.warn("[zstdnet-server] failed to build traffic report for {}: {}", player.getGameProfile().getName(), e.toString());
+                        response.writeBoolean(false);
+                        response.writeUtf("服务器生成流量报告失败：" + e.getMessage(), MAX_REPORT_BYTES);
+                    }
+                }
+                ServerPlayNetworking.send(player, TRAFFIC_REPORT_RESPONSE_ID, response);
+            });
+        });
     }
 
     public static void initClient() {
@@ -97,6 +121,12 @@ public final class LanCompressionSync {
             ServerProxyBootstrap.ServerHudSnapshot snapshot = decodeServerHudSnapshot(buf);
             client.execute(() -> ClientProxyPublisher.acceptRemoteServerHudSnapshot(snapshot));
         });
+
+        ClientPlayNetworking.registerGlobalReceiver(TRAFFIC_REPORT_RESPONSE_ID, (client, handler, buf, responseSender) -> {
+            boolean success = buf.readBoolean();
+            String payload = buf.readUtf(MAX_REPORT_BYTES);
+            client.execute(() -> ClientProxyPublisher.acceptTrafficReportResponse(success, payload));
+        });
     }
 
     public static void requestCompressionUpgrade(ServerPlayer player) {
@@ -117,6 +147,12 @@ public final class LanCompressionSync {
         FriendlyByteBuf buf = PacketByteBufs.create();
         encodeServerHudSnapshot(snapshot, buf);
         ServerPlayNetworking.send(player, SERVER_HUD_ID, buf);
+    }
+
+    public static void requestTrafficReport(String range) {
+        FriendlyByteBuf request = PacketByteBufs.create();
+        request.writeUtf(range, 16);
+        ClientPlayNetworking.send(TRAFFIC_REPORT_REQUEST_ID, request);
     }
 
     private static void applyClientThreshold(int threshold) {
