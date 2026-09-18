@@ -1,6 +1,8 @@
 # common
 *.log
+!docs/validation/**/*.log
 *.tmp
+.tools/
 
 # gradle
 .gradle/

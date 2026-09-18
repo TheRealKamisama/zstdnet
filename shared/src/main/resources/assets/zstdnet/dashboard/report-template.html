@@ -632,9 +632,9 @@
         <article class="panel compression">
           <div class="panel-title" id="compressionTitle">TCP 压缩效率</div>
           <div class="panel-sub" id="compressionSubtitle">原始 Minecraft 数据与公网 TCP 线路字节</div>
-          <div class="saving"><div><strong id="savingPercent">—</strong><span id="savingRatioLabel"> 节省比例</span></div><span id="rawVsWire">—</span></div>
+          <div class="saving"><div><strong id="savingPercent">—</strong><span id="savingRatioLabel"> 节省流量</span></div><span id="rawVsWire">—</span></div>
           <div class="meter"><span id="savingMeter"></span></div>
-          <div class="metric-line"><span id="wireRawLabel">线路 / 原始</span><strong id="wireRawPercent">—</strong></div>
+          <div class="metric-line"><span id="wireRawLabel">压缩后剩余</span><strong id="wireRawPercent">—</strong></div>
         </article>
       </div>
     </section>
@@ -686,7 +686,7 @@
           trendTitle:'上下行速率趋势', directionTitle:'线路方向构成', directionSubtitle:'所选范围内的公网字节',
           wireTotalLabel:'总线路流量', wireOutLabel:'出站', wireInLabel:'入站', udpShareLabel:'UDP 占比',
           directionEgressLabel:'出站流量', directionIngressLabel:'入站流量', directionUdpLabel:'UDP 流量',
-          compressionTitle:'TCP 压缩效率', compressionSubtitle:'原始 Minecraft 数据与公网 TCP 线路字节', savingRatioLabel:' 节省比例', wireRawLabel:'线路 / 原始',
+          compressionTitle:'TCP 压缩效率', compressionSubtitle:'原始 Minecraft 数据与公网 TCP 线路字节', savingRatioLabel:' 节省流量', wireRawLabel:'压缩后剩余',
           dailyTitle:'每日线路流量', dailySubtitle:'入站与出站堆叠对比', bandwidthTitle:'带宽使用参考',
           p95InLabel:'95% 时间内，入站不超过', p95OutLabel:'95% 时间内，出站不超过',
           p99InLabel:'99% 时间内，入站不超过', p99OutLabel:'99% 时间内，出站不超过',
@@ -708,7 +708,7 @@
           rateExplanation:granularity => `当前查询内，速率是服务器网络公网应用层的平均字节/秒；每个趋势点表示 ${granularity} 平均。带宽参考同时换算为 Mbps（1 Mbps = 1,000,000 bit/s）。`,
           shortSampleContext:points => `当前查询只有 ${points} 个时间点，95%、99% 和最高速率相同属于正常现象；扩大查询时间可获得更有区分度的参考。`,
           fullSampleContext:'95% / 99% 分别表示只有 5% / 1% 的时间点会高于该速率。',
-          wireRaw:value => `线路/原始 ${value}`,
+          wireRaw:value => `压缩后剩余 ${value}`,
           directionShare:value => `占比 ${value}`,
           ranges:{today:'今日',session:'本次运行','24h':'最近 24 小时','7d':'最近 7 天','30d':'最近 30 天'},
           modes:{dedicated:'专用服务器',lan:'局域网',inactive:'未运行',unknown:'未知模式'}
@@ -722,7 +722,7 @@
           trendTitle:'Ingress and Egress Rate', directionTitle:'Traffic Direction Split', directionSubtitle:'Public wire bytes in the selected range',
           wireTotalLabel:'Total wire traffic', wireOutLabel:'Egress', wireInLabel:'Ingress', udpShareLabel:'UDP share',
           directionEgressLabel:'Egress traffic', directionIngressLabel:'Ingress traffic', directionUdpLabel:'UDP traffic',
-          compressionTitle:'TCP Compression Efficiency', compressionSubtitle:'Raw Minecraft data compared with public TCP wire bytes', savingRatioLabel:' saved', wireRawLabel:'Wire / Raw',
+          compressionTitle:'TCP Compression Efficiency', compressionSubtitle:'Raw Minecraft data compared with public TCP wire bytes', savingRatioLabel:' traffic saved', wireRawLabel:'Remaining after compression',
           dailyTitle:'Daily Wire Traffic', dailySubtitle:'Stacked ingress and egress comparison', bandwidthTitle:'Bandwidth Planning Reference',
           p95InLabel:'Ingress stayed below this 95% of the time', p95OutLabel:'Egress stayed below this 95% of the time',
           p99InLabel:'Ingress stayed below this 99% of the time', p99OutLabel:'Egress stayed below this 99% of the time',
@@ -744,7 +744,7 @@
           rateExplanation:granularity => `For the current query, rate is the server network's average public application bytes per second; each trend point is a ${granularity} average. Bandwidth references also include Mbps (1 Mbps = 1,000,000 bit/s).`,
           shortSampleContext:points => `This query has only ${points} time points, so P95, P99, and the peak can be identical. Widen the query for a more distinct reference.`,
           fullSampleContext:'P95 / P99 mean that only 5% / 1% of time points are above that rate.',
-          wireRaw:value => `Wire/Raw ${value}`,
+          wireRaw:value => `Remaining after compression ${value}`,
           directionShare:value => `${value} of total`,
           ranges:{today:'Today',session:'Current run','24h':'Last 24 hours','7d':'Last 7 days','30d':'Last 30 days'},
           modes:{dedicated:'Dedicated server',lan:'LAN',inactive:'Inactive',unknown:'Unknown mode'}

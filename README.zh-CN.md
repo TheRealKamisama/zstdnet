@@ -1,4 +1,10 @@
-# ZstdNet
+# ZstdNet — Cleanroom 1.12.2 Fork
+
+本仓库是 **ZstdNet 的向后移植（Backport）Fork**，在保留现代版本模块的基础上，将兼容范围向后扩展至 **Minecraft 1.12.2 / Cleanroom / Java 25**。当前 Cleanroom 模块版本为 `1.4.7-cleanroom.4`，用户已确认实际进服与 Zstd 压缩正常。
+
+Cleanroom 的安装、构建、配置及命令见[独立模块说明](mods/1.12.2/zstdnet-cleanroom/README.zh-CN.md)；[迁移验证范围](docs/cleanroom-1.12.2-java25-validation.zh-CN.md)、[压缩修复验证](docs/cleanroom-1.12.2-compression-fix.zh-CN.md)和[客户端界面修复](docs/cleanroom-1.12.2-client-ui-fix.zh-CN.md)单独记录。需要 Cleanroom 和 Java 25，不适用于传统 Forge 1.12.2 / Java 8，也不提供跨 Minecraft 版本联机。
+
+下文保留现代版本的功能和使用说明；其命令、配置路径、权限和 LAN 行为不能直接套用到 Cleanroom。文中的 CurseForge 下载链接属于上游项目，不代表上游发布了本 Fork 的 Cleanroom 版本。
 
 ZstdNet 是一个 Minecraft Java 版模组，用 ZSTD 压缩客户端与服务端之间的转发流量，目标是在高重复数据场景下显著降低公网带宽占用。
 
@@ -38,7 +44,7 @@ Raw: 189.07 GB (4.8MB/s) | Zstd: 10.28 GB (303.7KB/s) | Ratio: 5.44% | Conns: 8
 推荐客户端和服务端都安装本模组。
 
 - 当前仓库已同步支持：
-  Forge 1.20.1、NeoForge 1.20.1、NeoForge 1.21.1、Fabric 1.20.1、Fabric 1.21.1
+  **Cleanroom 1.12.2 / Java 25（本 Fork 新增）**；保留 Forge 1.20.1、NeoForge 1.20.1、NeoForge 1.21.1、Fabric 1.20.1、Fabric 1.21.1 模块
 - 普通连接远程 ZstdNet 服务器时：客户端需要安装
 - 使用内置 Zstd 服务端入口时：服务端需要安装
 - 单机开放局域网并对外分享 Zstd 入口时：房主客户端需要安装

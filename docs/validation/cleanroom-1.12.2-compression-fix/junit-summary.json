@@ -1,0 +1,79 @@
+[
+  {
+    "name": "cn.tohsaka.factory.zstdnet.client.InternalConnectGuardTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.client.TrafficReportGeneratorTest",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.core.stats.TrafficStatisticsServiceTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.network.ReportAssemblyTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.network.VanillaCompressionTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.proxy.HandshakeTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.proxy.LocalZstdNetUdpPassthroughTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.server.ForwardedAddressTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.server.ProxyBoundaryTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.server.ProxyIntegrationTest",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "name": "cn.tohsaka.factory.zstdnet.server.ServerProxyRuntimeVoiceChatTest",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

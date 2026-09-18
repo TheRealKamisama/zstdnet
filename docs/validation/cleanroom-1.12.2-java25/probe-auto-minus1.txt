@@ -1,0 +1,7 @@
+PRODUCTION_STATUS_OK {"description":{"text":"A Minecraft Server"},"players":{"max":20,"online":0},"version":{"name":"1.12.2","protocol":340},"modinfo":{"type":"FML","modList":[{"modid":"minecraft","version":"1.12.2"},{"modid":"mcp","version":"9.42"},{"modid":"cleanroom","version":"0.6.10-alpha"},{"modid":"cleanmix","version":"0.7.2"},{"modid":"mixinbooter","version":"11.8"},{"modid":"configanytime","version":"3.0"},{"modid":"kirino_engine","version":"epoch-1.a5"},{"modid":"kirino_ecs","version":"epoch-1.a3"},{"modid":"kirino_gl","version":"epoch-1.a2"},{"modid":"FML","version":"8.0.99.99"},{"modid":"forge","version":"14.23.5.2864"},{"modid":"zstdnet","version":"1.4.7-cleanroom.1"}]}}
+PRODUCTION_REPORT_OK chunks=1 bytes=19869
+PRODUCTION_FML_WIRE_OK round=1 registries=11 chunks=49 threshold=-1
+PRODUCTION_FML_WIRE_OK round=2 registries=11 chunks=1 threshold=-1
+PRODUCTION_FML_WIRE_OK round=3 registries=11 chunks=1 threshold=-1
+PRODUCTION_PROBE_SUCCESS status, ping, FML wire handshake, chunks, three reconnects
+BUILD SUCCESSFUL in 32s

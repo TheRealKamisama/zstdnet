@@ -1,0 +1,17 @@
+[18:03:01] [main/INFO] [FML]: Java is OpenJDK 64-Bit Server VM, version 25.0.4.1, running on Windows 11:amd64:10.0, installed at C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\jdk25\jdk-25.0.4.1+1
+[18:03:08] [Server thread/INFO] [FML]: FML has found a non-mod file zstd-jni-1.5.7-7.jar in your mods directory. It will now be injected into your classpath.
+[18:03:12] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Done (1.752s)! For help, type "help" or "?"
+[18:03:13] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] started: mode=dedicated listen=127.0.0.1:25586 target=127.0.0.1:25587
+[18:03:13] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] auto takeover active: public_entry=127.0.0.1:25586 backend=127.0.0.1:25587
+[18:06:42] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[18:06:42] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:53969] logged in with entity id 0 at (658.5, 4.0, 938.5)
+[18:06:42] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[18:06:43] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[18:06:43] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:53984] logged in with entity id 151 at (658.5, 4.0, 938.5)
+[18:06:43] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[18:06:44] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[18:06:44] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:53988] logged in with entity id 202 at (658.5, 4.0, 938.5)
+[18:06:44] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[18:08:28] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds
+[18:08:28] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] stopped
+[18:08:28] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds

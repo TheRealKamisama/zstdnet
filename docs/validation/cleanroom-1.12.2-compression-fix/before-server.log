@@ -1,0 +1,214 @@
+[21:34:26] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLServerTweaker
+[21:34:26] [main/INFO] [Foundation]: Using primary tweak name net.minecraftforge.fml.common.launcher.FMLServerTweaker
+[21:34:26] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLServerTweaker@19b89d4
+[21:34:26] [main/INFO] [FML.TWEAK]: Jar location: file:/C:/Users/TheRe/.codex/worktrees/91dc/zstdnet/.tools/production-server/cleanroom-0.6.10-alpha.jar
+[21:34:26] [main/INFO] [FML]: Forge Mod Loader version 14.23.5.2864 for Minecraft 1.12.2 loading
+[21:34:26] [main/INFO] [FML]: Cleanroom version 0.6.10-alpha
+[21:34:26] [main/INFO] [FML]: Java is OpenJDK 64-Bit Server VM, version 25.0.4.1, running on Windows 11:amd64:10.0, installed at C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\jdk25\jdk-25.0.4.1+1
+[21:34:26] [main/INFO] [Cleanroom]: Initializing CleanMix...
+[21:34:26] [main/INFO] [CleanMix]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=jar:file:/C:/Users/TheRe/.codex/worktrees/91dc/zstdnet/.tools/production-server/libraries/com/cleanroommc/cleanmix/0.7.2/cleanmix-0.7.2.jar!/org/spongepowered/asm/mixin/MixinEnvironment.class Service=CleanMix Env=SERVER
+[21:34:27] [main/INFO] [Cleanroom]: Discovering mods
+[21:34:27] [main/INFO] [FML]: Searching C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\.\mods for mods
+[21:34:27] [main/INFO] [FML]: Searching C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\.\mods\1.12.2 for mods
+[21:34:27] [main/INFO] [Cleanroom]: Finished discovering mods. Found 1 discovered mod ids in 263 ms.
+[21:34:27] [main/INFO] [Cleanroom]: Initializing MixinExtras...
+[21:34:27] [main/INFO] [Foundation]: Loading tweak name org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[21:34:27] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[21:34:27] [main/INFO] [Foundation]: Loading tweak name org.spongepowered.asm.launch.MixinTweaker
+[21:34:27] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[21:34:27] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker@31ceba99
+[21:34:27] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker@31ceba99
+[21:34:27] [main/INFO] [Foundation]: Calling tweak org.spongepowered.asm.mixin.EnvironmentStateTweaker@6ff6efdc
+[21:34:27] [main/INFO] [Foundation]: Calling tweak FMLCorePlugin
+[21:34:28] [main/INFO] [FML]: FML appears to be missing any signature data. This is expected, don't worry.
+[21:34:28] [main/INFO] [Foundation]: Calling tweak FMLForgePlugin
+[21:34:28] [main/INFO] [Foundation]: Calling tweak org.spongepowered.asm.launch.MixinTweaker@6a15b73
+[21:34:28] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLDeobfTweaker@44dc7b7d
+[21:34:29] [main/INFO] [Foundation]: Launching wrapped minecraft net.minecraft.server.MinecraftServer
+[21:34:33] [main/INFO] [MixinExtras|Service]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.5).
+[21:34:33] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Starting minecraft server version 1.12.2
+[21:34:33] [Server thread/INFO] [FML]: Cleanroom v0.6.10-alpha Initialized
+[21:34:33] [Server thread/INFO] [FML]: Starts to replace vanilla recipe ingredients with ore ingredients.
+[21:34:33] [Server thread/INFO] [FML]: Invalid recipe found with multiple oredict ingredients in the same ingredient...
+[21:34:33] [Server thread/INFO] [FML]: Replaced 1227 ore ingredients
+[21:34:33] [Server thread/WARN] [FML]: These mods are missing:
+[21:34:33] [Server thread/WARN] [FML]:   Fugue is missing
+[21:34:33] [Server thread/WARN] [FML]:   Scalar is missing
+[21:34:33] [Server thread/INFO] [FML]: Using fml.queryResult confirm to answer the following query:
+WARNING
+Fugue and Scalar are not installed
+Your pack may crash without these mods.
+To disable this warning, check forge_early.cfg
+
+Run the command /fml confirm to proceed, or /fml cancel to abort.
+[21:34:33] [Server thread/INFO] [Kirino Core]: Initializing Kirino-Engine's Mod Container.
+[21:34:33] [Server thread/INFO] [Kirino Core]: Initializing Kirino-ECS's Mod Container.
+[21:34:33] [Server thread/INFO] [Kirino Core]: Initializing Kirino-GL's Mod Container.
+[21:34:34] [Server thread/INFO] [FML]: Forge Mod Loader has identified 12 mods to load
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for cleanmix: assets/cleanmix/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for mixinbooter: assets/mixinbooter/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for configanytime: assets/configanytime/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for kirino_engine: assets/kirino_engine/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for kirino_ecs: assets/kirino_ecs/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for kirino_gl: assets/kirino_gl/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for FML: assets/fml/lang/en_us.lang
+[21:34:34] [Server thread/WARN] [FML]: Missing English translation for zstdnet: assets/zstdnet/lang/en_us.lang
+[21:34:34] [Server thread/INFO] [FML]: FML has found a non-mod file zstd-jni-1.5.7-7.jar in your mods directory. It will now be injected into your classpath.
+[21:34:34] [Server thread/INFO] [FML]: Attempting connection with missing mods [minecraft, mcp, cleanroom, cleanmix, mixinbooter, configanytime, kirino_engine, kirino_ecs, kirino_gl, FML, forge, zstdnet] at CLIENT
+[21:34:34] [Server thread/INFO] [FML]: Attempting connection with missing mods [minecraft, mcp, cleanroom, cleanmix, mixinbooter, configanytime, kirino_engine, kirino_ecs, kirino_gl, FML, forge, zstdnet] at SERVER
+[21:34:34] [Server thread/INFO] [FML]: Processing ObjectHolder annotations
+[21:34:34] [Server thread/INFO] [FML]: Found 1168 ObjectHolder annotations
+[21:34:34] [Server thread/INFO] [FML]: Identifying ItemStackHolder annotations
+[21:34:34] [Server thread/INFO] [FML]: Found 0 ItemStackHolder annotations
+[21:34:34] [Server thread/INFO] [FML]: Configured a dormant chunk cache size of 0
+[21:34:34] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[21:34:35] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:35] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:35] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:35] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:35] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:35] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:35] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:35] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:35] [Server thread/INFO] [FML]: Injecting itemstacks
+[21:34:35] [Server thread/INFO] [FML]: Itemstack injection complete
+[21:34:35] [Server thread/INFO] [Kirino Core]: ---------- Kirino Common Initialization ----------
+[21:34:35] [Server thread/INFO] [Kirino Core]: Registered the default ShaderRegistrationEvent listener.
+[21:34:35] [Server thread/INFO] [Kirino Core]: Registered the default PostProcessingRegistrationEvent listener.
+[21:34:35] [Server thread/INFO] [Kirino Core]: Initializing ECS Runtime.
+[21:34:35] [Server thread/INFO] [Kirino Core]: ECS Runtime Initialized. Time taken: 86 ms
+[21:34:35] [Server thread/INFO] [Kirino Core]: Initializing Kirino Engine.
+[21:34:35] [Server thread/INFO] [Kirino Core]: Registered headless module installer "com.cleanroommc.kirino.engine.analysis.install.AnalyticalWorldInstaller".
+[21:34:35] [Server thread/INFO] [Kirino Core]: Registered graphics module installer "com.cleanroommc.kirino.engine.graphics.install.GraphicsWorldInstaller".
+[21:34:35] [Server thread/INFO] [Kirino Core]: Kirino Engine Initialized. Time taken: 255 ms
+[21:34:35] [Server thread/INFO] [Kirino Core]: ---------- Kirino Server-Side Initialization ----------
+[21:34:35] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Loading properties
+[21:34:35] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Default game type: SURVIVAL
+[21:34:35] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Generating keypair
+[21:34:35] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Starting Minecraft server on 127.0.0.1:25586
+[21:34:35] [Server thread/INFO] [net.minecraft.network.NetworkSystem]: Using default channel type
+[21:34:36] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[21:34:36] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[21:34:36] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[21:34:36] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[21:34:36] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:36] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:36] [Server thread/INFO] [FML]: Injecting itemstacks
+[21:34:36] [Server thread/INFO] [FML]: Itemstack injection complete
+[21:34:36] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Found status: BETA Target: null
+[21:34:36] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Starting version check at https://download.cleanroommc.com/api/forge
+[21:34:36] [Server thread/INFO] [FML]: Forge Mod Loader has successfully loaded 12 mods
+[21:34:36] [Server thread/INFO] [Kirino Core]: ---------- Kirino Common Post-Initialization ----------
+[21:34:36] [Server thread/INFO] [Kirino Core]: ---------- Kirino Server-Side Post-Initialization ----------
+[21:34:36] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Preparing level "zstdnet-test-world"
+[21:34:36] [Server thread/INFO] [FML]: Injecting existing registry data into this server instance
+[21:34:37] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[21:34:37] [Server thread/INFO] [FML]: Object Holders set.
+[21:34:37] [Server thread/INFO] [FML]: Loading dimension 0 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@33be8637)
+[21:34:37] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Found status: BETA_OUTDATED Target: 0.6.13-alpha
+[21:34:37] [Server thread/INFO] [net.minecraft.advancements.AdvancementList]: Loaded 488 advancements
+[21:34:37] [Server thread/INFO] [FML]: Loading dimension -1 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@33be8637)
+[21:34:38] [Server thread/INFO] [FML]: Loading dimension 1 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@33be8637)
+[21:34:38] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Preparing start region for level 0
+[21:34:38] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Done (1.828s)! For help, type "help" or "?"
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] periodic stats logging disabled.
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] voice chat UDP passthrough disabled.
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] UDP route armed [game]: 127.0.0.1:35586 -> 127.0.0.1:25586
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] started: mode=dedicated listen=127.0.0.1:35586 target=127.0.0.1:25586
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] guard: max_conn=9999 max_req=50 window=PT10S ban=PT1M
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] tuning: flush=PT0.002S idle_timeout=PT0S rate_per_conn=0B/s rate_global=0B/s burst=262144B
+[21:34:38] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] raw vanilla login passthrough: disabled
+[21:34:38] [Server thread/INFO] [FML]: Unloading dimension -1
+[21:34:38] [Server thread/INFO] [FML]: Unloading dimension 1
+[21:47:55] [zstdsrv-worker-2/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[21:47:55] [Netty Server IO #2/INFO] [FML]: Client protocol version 2
+[21:47:55] [Netty Server IO #2/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.1,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[21:47:55] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[21:47:55] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[21:47:55] [Netty Server IO #2/ERROR] [FML]: NetworkDispatcher exception
+java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:57)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:137)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:81)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:58)
+	at java.base/sun.nio.ch.SocketChannelImpl.implWrite(SocketChannelImpl.java:562)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:614)
+	at io.netty.channel.socket.nio.NioSocketChannel.doWrite(NioSocketChannel.java:408)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.flush0(AbstractChannel.java:794)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.flush0(AbstractNioChannel.java:404)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.flush(AbstractChannel.java:758)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.flush(DefaultChannelPipeline.java:1391)
+	at io.netty.channel.AbstractChannelHandlerContext.flush(AbstractChannelHandlerContext.java:754)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.flush(NetworkDispatcher.java:555)
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:821)
+	at io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:776)
+	at io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:859)
+	at io.netty.channel.DefaultChannelPipeline.writeAndFlush(DefaultChannelPipeline.java:1046)
+	at io.netty.channel.Channel.writeAndFlush(Channel.java:257)
+	at net.minecraft.network.NetworkManager.func_150732_b(NetworkManager.java:231)
+	at net.minecraft.network.NetworkManager.func_179290_a(NetworkManager.java:170)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.sendProxy(NetworkDispatcher.java:462)
+	at net.minecraftforge.fml.common.network.handshake.HandshakeInjector.write(HandshakeInjector.java:39)
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:800)
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:737)
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:113)
+	at io.netty.handler.codec.MessageToMessageCodec.write(MessageToMessageCodec.java:130)
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:798)
+	at io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:776)
+	at io.netty.channel.AbstractChannelHandlerContext.writeAndFlush(AbstractChannelHandlerContext.java:859)
+	at net.minecraftforge.fml.common.network.handshake.FMLHandshakeServerState$3.accept(FMLHandshakeServerState.java:94)
+	at net.minecraftforge.fml.common.network.handshake.HandshakeMessageHandler.channelRead0(HandshakeMessageHandler.java:48)
+	at net.minecraftforge.fml.common.network.handshake.HandshakeMessageHandler.channelRead0(HandshakeMessageHandler.java:28)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:107)
+	at io.netty.handler.codec.MessageToMessageCodec.channelRead(MessageToMessageCodec.java:120)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:355)
+	at net.minecraftforge.fml.common.network.handshake.ChannelRegistrationHandler.channelRead0(ChannelRegistrationHandler.java:54)
+	at net.minecraftforge.fml.common.network.handshake.ChannelRegistrationHandler.channelRead0(ChannelRegistrationHandler.java:36)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.embedded.EmbeddedChannel.writeInbound(EmbeddedChannel.java:369)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.handleServerSideCustomPacket(NetworkDispatcher.java:434)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.channelRead0(NetworkDispatcher.java:264)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.channelRead0(NetworkDispatcher.java:72)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.timeout.IdleStateHandler.channelRead(IdleStateHandler.java:288)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:355)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:176)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.handle(AbstractNioChannel.java:445)
+	at io.netty.channel.nio.NioIoHandler$DefaultNioRegistration.handle(NioIoHandler.java:388)
+	at io.netty.channel.nio.NioIoHandler.processSelectedKey(NioIoHandler.java:596)
+	at io.netty.channel.nio.NioIoHandler.processSelectedKeysPlain(NioIoHandler.java:541)
+	at io.netty.channel.nio.NioIoHandler.processSelectedKeys(NioIoHandler.java:514)
+	at io.netty.channel.nio.NioIoHandler.run(NioIoHandler.java:484)
+	at io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1195)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[22:14:09] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Stopping the server
+[22:14:09] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Stopping server
+[22:14:09] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving players
+[22:14:09] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds
+[22:14:09] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving chunks for level 'zstdnet-test-world'/overworld
+[22:14:09] [Server thread/INFO] [FML]: Unloading dimension 0
+[22:14:09] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] stopped
+[22:14:09] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Stopping server
+[22:14:09] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Saving players
+[22:14:09] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds

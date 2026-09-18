@@ -1,0 +1,490 @@
+Compiled from "NetHandlerLoginServer.java"
+class net.minecraft.server.network.NetHandlerLoginServer$1 implements io.netty.channel.ChannelFutureListener {
+  final net.minecraft.server.network.NetHandlerLoginServer this$0;
+
+  net.minecraft.server.network.NetHandlerLoginServer$1(net.minecraft.server.network.NetHandlerLoginServer);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: dup
+         3: invokestatic  #23                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+         6: pop
+         7: putfield      #25                 // Field this$0:Lnet/minecraft/server/network/NetHandlerLoginServer;
+        10: aload_0
+        11: invokespecial #27                 // Method java/lang/Object."<init>":()V
+        14: return
+
+  public void operationComplete(io.netty.channel.ChannelFuture) throws java.lang.Exception;
+    Code:
+         0: aload_0
+         1: getfield      #25                 // Field this$0:Lnet/minecraft/server/network/NetHandlerLoginServer;
+         4: getfield      #38                 // Field net/minecraft/server/network/NetHandlerLoginServer.networkManager:Lnet/minecraft/network/NetworkManager;
+         7: aload_0
+         8: getfield      #25                 // Field this$0:Lnet/minecraft/server/network/NetHandlerLoginServer;
+        11: getfield      #42                 // Field net/minecraft/server/network/NetHandlerLoginServer.server:Lnet/minecraft/server/MinecraftServer;
+        14: invokevirtual #48                 // Method net/minecraft/server/MinecraftServer.getNetworkCompressionThreshold:()I
+        17: invokevirtual #54                 // Method net/minecraft/network/NetworkManager.setCompressionThreshold:(I)V
+        20: return
+
+  public void operationComplete(io.netty.util.concurrent.Future) throws java.lang.Exception;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: checkcast     #59                 // class io/netty/channel/ChannelFuture
+         5: invokevirtual #61                 // Method operationComplete:(Lio/netty/channel/ChannelFuture;)V
+         8: return
+}
+Compiled from "NettyCompressionEncoder.java"
+public class net.minecraft.network.NettyCompressionEncoder extends io.netty.handler.codec.MessageToByteEncoder<io.netty.buffer.ByteBuf> {
+  private final byte[] buffer;
+
+  private final java.util.zip.Deflater deflater;
+
+  private int threshold;
+
+  public net.minecraft.network.NettyCompressionEncoder(int);
+    Code:
+         0: aload_0
+         1: invokespecial #18                 // Method io/netty/handler/codec/MessageToByteEncoder."<init>":()V
+         4: aload_0
+         5: sipush        8192
+         8: newarray       byte
+        10: putfield      #20                 // Field buffer:[B
+        13: aload_0
+        14: iload_1
+        15: putfield      #22                 // Field threshold:I
+        18: aload_0
+        19: new           #24                 // class java/util/zip/Deflater
+        22: dup
+        23: invokespecial #25                 // Method java/util/zip/Deflater."<init>":()V
+        26: putfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+        29: return
+
+  protected void encode(io.netty.channel.ChannelHandlerContext, io.netty.buffer.ByteBuf, io.netty.buffer.ByteBuf) throws java.lang.Exception;
+    Code:
+         0: aload_2
+         1: invokevirtual #42                 // Method io/netty/buffer/ByteBuf.readableBytes:()I
+         4: istore        4
+         6: new           #44                 // class net/minecraft/network/PacketBuffer
+         9: dup
+        10: aload_3
+        11: invokespecial #47                 // Method net/minecraft/network/PacketBuffer."<init>":(Lio/netty/buffer/ByteBuf;)V
+        14: astore        5
+        16: iload         4
+        18: aload_0
+        19: getfield      #22                 // Field threshold:I
+        22: if_icmpge     42
+        25: aload         5
+        27: iconst_0
+        28: invokevirtual #51                 // Method net/minecraft/network/PacketBuffer.writeVarInt:(I)Lnet/minecraft/network/PacketBuffer;
+        31: pop
+        32: aload         5
+        34: aload_2
+        35: invokevirtual #55                 // Method net/minecraft/network/PacketBuffer.writeBytes:(Lio/netty/buffer/ByteBuf;)Lio/netty/buffer/ByteBuf;
+        38: pop
+        39: goto          129
+        42: iload         4
+        44: newarray       byte
+        46: astore        6
+        48: aload_2
+        49: aload         6
+        51: invokevirtual #59                 // Method io/netty/buffer/ByteBuf.readBytes:([B)Lio/netty/buffer/ByteBuf;
+        54: pop
+        55: aload         5
+        57: aload         6
+        59: arraylength
+        60: invokevirtual #51                 // Method net/minecraft/network/PacketBuffer.writeVarInt:(I)Lnet/minecraft/network/PacketBuffer;
+        63: pop
+        64: aload_0
+        65: getfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+        68: aload         6
+        70: iconst_0
+        71: iload         4
+        73: invokevirtual #63                 // Method java/util/zip/Deflater.setInput:([BII)V
+        76: aload_0
+        77: getfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+        80: invokevirtual #66                 // Method java/util/zip/Deflater.finish:()V
+        83: aload_0
+        84: getfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+        87: invokevirtual #70                 // Method java/util/zip/Deflater.finished:()Z
+        90: ifne          122
+        93: aload_0
+        94: getfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+        97: aload_0
+        98: getfield      #20                 // Field buffer:[B
+       101: invokevirtual #74                 // Method java/util/zip/Deflater.deflate:([B)I
+       104: istore        7
+       106: aload         5
+       108: aload_0
+       109: getfield      #20                 // Field buffer:[B
+       112: iconst_0
+       113: iload         7
+       115: invokevirtual #77                 // Method net/minecraft/network/PacketBuffer.writeBytes:([BII)Lio/netty/buffer/ByteBuf;
+       118: pop
+       119: goto          83
+       122: aload_0
+       123: getfield      #27                 // Field deflater:Ljava/util/zip/Deflater;
+       126: invokevirtual #80                 // Method java/util/zip/Deflater.reset:()V
+       129: return
+
+  public void setCompressionThreshold(int);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: putfield      #22                 // Field threshold:I
+         5: return
+
+  protected void encode(io.netty.channel.ChannelHandlerContext, java.lang.Object, io.netty.buffer.ByteBuf) throws java.lang.Exception;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_2
+         3: checkcast     #38                 // class io/netty/buffer/ByteBuf
+         6: aload_3
+         7: invokevirtual #92                 // Method encode:(Lio/netty/channel/ChannelHandlerContext;Lio/netty/buffer/ByteBuf;Lio/netty/buffer/ByteBuf;)V
+        10: return
+}
+Compiled from "NettyCompressionDecoder.java"
+public class net.minecraft.network.NettyCompressionDecoder extends io.netty.handler.codec.ByteToMessageDecoder {
+  private final java.util.zip.Inflater inflater;
+
+  private int threshold;
+
+  public net.minecraft.network.NettyCompressionDecoder(int);
+    Code:
+         0: aload_0
+         1: invokespecial #15                 // Method io/netty/handler/codec/ByteToMessageDecoder."<init>":()V
+         4: aload_0
+         5: iload_1
+         6: putfield      #17                 // Field threshold:I
+         9: aload_0
+        10: new           #19                 // class java/util/zip/Inflater
+        13: dup
+        14: invokespecial #20                 // Method java/util/zip/Inflater."<init>":()V
+        17: putfield      #22                 // Field inflater:Ljava/util/zip/Inflater;
+        20: return
+
+  protected void decode(io.netty.channel.ChannelHandlerContext, io.netty.buffer.ByteBuf, java.util.List<java.lang.Object>) throws java.lang.Exception;
+    Code:
+         0: aload_2
+         1: invokevirtual #38                 // Method io/netty/buffer/ByteBuf.readableBytes:()I
+         4: ifne          8
+         7: return
+         8: new           #42                 // class net/minecraft/network/PacketBuffer
+        11: dup
+        12: aload_2
+        13: invokespecial #45                 // Method net/minecraft/network/PacketBuffer."<init>":(Lio/netty/buffer/ByteBuf;)V
+        16: astore        4
+        18: aload         4
+        20: invokevirtual #48                 // Method net/minecraft/network/PacketBuffer.readVarInt:()I
+        23: istore        5
+        25: iload         5
+        27: ifne          50
+        30: aload_3
+        31: aload         4
+        33: aload         4
+        35: invokevirtual #49                 // Method net/minecraft/network/PacketBuffer.readableBytes:()I
+        38: invokevirtual #53                 // Method net/minecraft/network/PacketBuffer.readBytes:(I)Lio/netty/buffer/ByteBuf;
+        41: invokeinterface #57,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        46: pop
+        47: goto          205
+        50: iload         5
+        52: aload_0
+        53: getfield      #17                 // Field threshold:I
+        56: if_icmpge     99
+        59: new           #59                 // class io/netty/handler/codec/DecoderException
+        62: dup
+        63: new           #61                 // class java/lang/StringBuilder
+        66: dup
+        67: invokespecial #62                 // Method java/lang/StringBuilder."<init>":()V
+        70: ldc           #64                 // String Badly compressed packet - size of
+        72: invokevirtual #68                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        75: iload         5
+        77: invokevirtual #71                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+        80: ldc           #73                 // String  is below server threshold of
+        82: invokevirtual #68                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        85: aload_0
+        86: getfield      #17                 // Field threshold:I
+        89: invokevirtual #71                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+        92: invokevirtual #77                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+        95: invokespecial #80                 // Method io/netty/handler/codec/DecoderException."<init>":(Ljava/lang/String;)V
+        98: athrow
+        99: iload         5
+       101: ldc           #81                 // int 2097152
+       103: if_icmple     144
+       106: new           #59                 // class io/netty/handler/codec/DecoderException
+       109: dup
+       110: new           #61                 // class java/lang/StringBuilder
+       113: dup
+       114: invokespecial #62                 // Method java/lang/StringBuilder."<init>":()V
+       117: ldc           #64                 // String Badly compressed packet - size of
+       119: invokevirtual #68                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       122: iload         5
+       124: invokevirtual #71                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+       127: ldc           #83                 // String  is larger than protocol maximum of
+       129: invokevirtual #68                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       132: ldc           #81                 // int 2097152
+       134: invokevirtual #71                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+       137: invokevirtual #77                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+       140: invokespecial #80                 // Method io/netty/handler/codec/DecoderException."<init>":(Ljava/lang/String;)V
+       143: athrow
+       144: aload         4
+       146: invokevirtual #49                 // Method net/minecraft/network/PacketBuffer.readableBytes:()I
+       149: newarray       byte
+       151: astore        6
+       153: aload         4
+       155: aload         6
+       157: invokevirtual #86                 // Method net/minecraft/network/PacketBuffer.readBytes:([B)Lio/netty/buffer/ByteBuf;
+       160: pop
+       161: aload_0
+       162: getfield      #22                 // Field inflater:Ljava/util/zip/Inflater;
+       165: aload         6
+       167: invokevirtual #90                 // Method java/util/zip/Inflater.setInput:([B)V
+       170: iload         5
+       172: newarray       byte
+       174: astore        7
+       176: aload_0
+       177: getfield      #22                 // Field inflater:Ljava/util/zip/Inflater;
+       180: aload         7
+       182: invokevirtual #94                 // Method java/util/zip/Inflater.inflate:([B)I
+       185: pop
+       186: aload_3
+       187: aload         7
+       189: invokestatic  #99                 // Method io/netty/buffer/Unpooled.wrappedBuffer:([B)Lio/netty/buffer/ByteBuf;
+       192: invokeinterface #57,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+       197: pop
+       198: aload_0
+       199: getfield      #22                 // Field inflater:Ljava/util/zip/Inflater;
+       202: invokevirtual #102                // Method java/util/zip/Inflater.reset:()V
+       205: return
+
+  public void setCompressionThreshold(int);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: putfield      #17                 // Field threshold:I
+         5: return
+}
+Compiled from "GuiConnecting.java"
+public class net.minecraft.client.multiplayer.GuiConnecting extends net.minecraft.client.gui.GuiScreen {
+  private static final java.util.concurrent.atomic.AtomicInteger CONNECTION_ID;
+
+  private static final org.apache.logging.log4j.Logger LOGGER;
+
+  private net.minecraft.network.NetworkManager networkManager;
+
+  private boolean cancel;
+
+  private final net.minecraft.client.gui.GuiScreen previousGuiScreen;
+
+  public net.minecraft.client.multiplayer.GuiConnecting(net.minecraft.client.gui.GuiScreen, net.minecraft.client.Minecraft, net.minecraft.client.multiplayer.ServerData);
+    Code:
+         0: aload_0
+         1: invokespecial #34                 // Method net/minecraft/client/gui/GuiScreen."<init>":()V
+         4: aload_0
+         5: aload_2
+         6: putfield      #38                 // Field mc:Lnet/minecraft/client/Minecraft;
+         9: aload_0
+        10: aload_1
+        11: putfield      #40                 // Field previousGuiScreen:Lnet/minecraft/client/gui/GuiScreen;
+        14: aload_3
+        15: getfield      #46                 // Field net/minecraft/client/multiplayer/ServerData.serverIP:Ljava/lang/String;
+        18: invokestatic  #52                 // Method net/minecraft/client/multiplayer/ServerAddress.fromString:(Ljava/lang/String;)Lnet/minecraft/client/multiplayer/ServerAddress;
+        21: astore        4
+        23: aload_2
+        24: aconst_null
+        25: invokevirtual #58                 // Method net/minecraft/client/Minecraft.loadWorld:(Lnet/minecraft/client/multiplayer/WorldClient;)V
+        28: aload_2
+        29: aload_3
+        30: invokevirtual #62                 // Method net/minecraft/client/Minecraft.setServerData:(Lnet/minecraft/client/multiplayer/ServerData;)V
+        33: aload_0
+        34: aload         4
+        36: invokevirtual #66                 // Method net/minecraft/client/multiplayer/ServerAddress.getIP:()Ljava/lang/String;
+        39: aload         4
+        41: invokevirtual #70                 // Method net/minecraft/client/multiplayer/ServerAddress.getPort:()I
+        44: invokevirtual #74                 // Method connect:(Ljava/lang/String;I)V
+        47: return
+
+  public net.minecraft.client.multiplayer.GuiConnecting(net.minecraft.client.gui.GuiScreen, net.minecraft.client.Minecraft, java.lang.String, int);
+    Code:
+         0: aload_0
+         1: invokespecial #34                 // Method net/minecraft/client/gui/GuiScreen."<init>":()V
+         4: aload_0
+         5: aload_2
+         6: putfield      #38                 // Field mc:Lnet/minecraft/client/Minecraft;
+         9: aload_0
+        10: aload_1
+        11: putfield      #40                 // Field previousGuiScreen:Lnet/minecraft/client/gui/GuiScreen;
+        14: aload_2
+        15: aconst_null
+        16: invokevirtual #58                 // Method net/minecraft/client/Minecraft.loadWorld:(Lnet/minecraft/client/multiplayer/WorldClient;)V
+        19: aload_0
+        20: aload_3
+        21: iload         4
+        23: invokevirtual #74                 // Method connect:(Ljava/lang/String;I)V
+        26: return
+
+  private void connect(java.lang.String, int);
+    Code:
+         0: getstatic     #86                 // Field LOGGER:Lorg/apache/logging/log4j/Logger;
+         3: ldc           #88                 // String Connecting to {}, {}
+         5: aload_1
+         6: iload_2
+         7: invokestatic  #94                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        10: invokeinterface #100,  4          // InterfaceMethod org/apache/logging/log4j/Logger.info:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+        15: new           #11                 // class net/minecraft/client/multiplayer/GuiConnecting$1
+        18: dup
+        19: aload_0
+        20: getstatic     #102                // Field CONNECTION_ID:Ljava/util/concurrent/atomic/AtomicInteger;
+        23: invokevirtual #107                // Method java/util/concurrent/atomic/AtomicInteger.incrementAndGet:()I
+        26: invokedynamic #119,  0            // InvokeDynamic #0:makeConcatWithConstants:(I)Ljava/lang/String;
+        31: aload_1
+        32: iload_2
+        33: invokespecial #122                // Method net/minecraft/client/multiplayer/GuiConnecting$1."<init>":(Lnet/minecraft/client/multiplayer/GuiConnecting;Ljava/lang/String;Ljava/lang/String;I)V
+        36: invokevirtual #125                // Method net/minecraft/client/multiplayer/GuiConnecting$1.start:()V
+        39: return
+
+  public void updateScreen();
+    Code:
+         0: aload_0
+         1: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+         4: ifnull        34
+         7: aload_0
+         8: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+        11: invokevirtual #134                // Method net/minecraft/network/NetworkManager.isChannelOpen:()Z
+        14: ifeq          27
+        17: aload_0
+        18: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+        21: invokevirtual #137                // Method net/minecraft/network/NetworkManager.processReceivedPackets:()V
+        24: goto          34
+        27: aload_0
+        28: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+        31: invokevirtual #140                // Method net/minecraft/network/NetworkManager.handleDisconnection:()V
+        34: return
+
+  protected void keyTyped(char, int) throws java.io.IOException;
+    Code:
+         0: return
+
+  public void initGui();
+    Code:
+         0: aload_0
+         1: getfield      #152                // Field buttonList:Ljava/util/List;
+         4: invokeinterface #157,  1          // InterfaceMethod java/util/List.clear:()V
+         9: aload_0
+        10: getfield      #152                // Field buttonList:Ljava/util/List;
+        13: new           #159                // class net/minecraft/client/gui/GuiButton
+        16: dup
+        17: iconst_0
+        18: aload_0
+        19: getfield      #162                // Field width:I
+        22: iconst_2
+        23: idiv
+        24: bipush        100
+        26: isub
+        27: aload_0
+        28: getfield      #165                // Field height:I
+        31: iconst_4
+        32: idiv
+        33: bipush        120
+        35: iadd
+        36: bipush        12
+        38: iadd
+        39: ldc           #167                // String gui.cancel
+        41: iconst_0
+        42: anewarray     #169                // class java/lang/Object
+        45: invokestatic  #175                // Method net/minecraft/client/resources/I18n.format:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+        48: invokespecial #178                // Method net/minecraft/client/gui/GuiButton."<init>":(IIILjava/lang/String;)V
+        51: invokeinterface #182,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        56: pop
+        57: return
+
+  protected void actionPerformed(net.minecraft.client.gui.GuiButton) throws java.io.IOException;
+    Code:
+         0: aload_1
+         1: getfield      #188                // Field net/minecraft/client/gui/GuiButton.id:I
+         4: ifne          46
+         7: aload_0
+         8: iconst_1
+         9: putfield      #190                // Field cancel:Z
+        12: aload_0
+        13: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+        16: ifnull        35
+        19: aload_0
+        20: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+        23: new           #192                // class net/minecraft/util/text/TextComponentString
+        26: dup
+        27: ldc           #194                // String Aborted
+        29: invokespecial #197                // Method net/minecraft/util/text/TextComponentString."<init>":(Ljava/lang/String;)V
+        32: invokevirtual #201                // Method net/minecraft/network/NetworkManager.closeChannel:(Lnet/minecraft/util/text/ITextComponent;)V
+        35: aload_0
+        36: getfield      #38                 // Field mc:Lnet/minecraft/client/Minecraft;
+        39: aload_0
+        40: getfield      #40                 // Field previousGuiScreen:Lnet/minecraft/client/gui/GuiScreen;
+        43: invokevirtual #205                // Method net/minecraft/client/Minecraft.displayGuiScreen:(Lnet/minecraft/client/gui/GuiScreen;)V
+        46: return
+
+  public void drawScreen(int, int, float);
+    Code:
+         0: aload_0
+         1: invokevirtual #214                // Method drawDefaultBackground:()V
+         4: aload_0
+         5: getfield      #128                // Field networkManager:Lnet/minecraft/network/NetworkManager;
+         8: ifnonnull     48
+        11: aload_0
+        12: aload_0
+        13: getfield      #218                // Field fontRenderer:Lnet/minecraft/client/gui/FontRenderer;
+        16: ldc           #220                // String connect.connecting
+        18: iconst_0
+        19: anewarray     #169                // class java/lang/Object
+        22: invokestatic  #175                // Method net/minecraft/client/resources/I18n.format:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+        25: aload_0
+        26: getfield      #162                // Field width:I
+        29: iconst_2
+        30: idiv
+        31: aload_0
+        32: getfield      #165                // Field height:I
+        35: iconst_2
+        36: idiv
+        37: bipush        50
+        39: isub
+        40: ldc           #221                // int 16777215
+        42: invokevirtual #225                // Method drawCenteredString:(Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V
+        45: goto          82
+        48: aload_0
+        49: aload_0
+        50: getfield      #218                // Field fontRenderer:Lnet/minecraft/client/gui/FontRenderer;
+        53: ldc           #227                // String connect.authorizing
+        55: iconst_0
+        56: anewarray     #169                // class java/lang/Object
+        59: invokestatic  #175                // Method net/minecraft/client/resources/I18n.format:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+        62: aload_0
+        63: getfield      #162                // Field width:I
+        66: iconst_2
+        67: idiv
+        68: aload_0
+        69: getfield      #165                // Field height:I
+        72: iconst_2
+        73: idiv
+        74: bipush        50
+        76: isub
+        77: ldc           #221                // int 16777215
+        79: invokevirtual #225                // Method drawCenteredString:(Lnet/minecraft/client/gui/FontRenderer;Ljava/lang/String;III)V
+        82: aload_0
+        83: iload_1
+        84: iload_2
+        85: fload_3
+        86: invokespecial #229                // Method net/minecraft/client/gui/GuiScreen.drawScreen:(IIF)V
+        89: return
+
+  static {};
+    Code:
+         0: new           #104                // class java/util/concurrent/atomic/AtomicInteger
+         3: dup
+         4: iconst_0
+         5: invokespecial #234                // Method java/util/concurrent/atomic/AtomicInteger."<init>":(I)V
+         8: putstatic     #102                // Field CONNECTION_ID:Ljava/util/concurrent/atomic/AtomicInteger;
+        11: invokestatic  #240                // Method org/apache/logging/log4j/LogManager.getLogger:()Lorg/apache/logging/log4j/Logger;
+        14: putstatic     #86                 // Field LOGGER:Lorg/apache/logging/log4j/Logger;
+        17: return
+}

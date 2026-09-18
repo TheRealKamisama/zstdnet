@@ -1,0 +1,113 @@
+// Based on CleanroomMC/CleanroomModTemplate (Java 25 / mixin branch).
+plugins {
+    id 'java-library'
+    id 'xyz.wagyourtail.unimined' version '1.4.36-kappa'
+}
+
+group = 'cn.tohsaka.factory'
+version = '1.4.7-cleanroom.4'
+base.archivesName = 'zstdnet-1.12.2-cleanroom'
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+configurations {
+    contain
+    implementation.extendsFrom(contain)
+}
+repositories { mavenCentral() }
+
+unimined.minecraft {
+    version '1.12.2'
+    mappings { mcp('stable', '39-1.12') }
+    cleanroom {
+        loader '0.6.10-alpha'
+        runs.all {
+            systemProperty('crl.dev.mixin', 'zstdnet.mixin.json')
+            jvmArgs += ['--enable-native-access=ALL-UNNAMED']
+            if (project.hasProperty('smokeHost')) {
+                systemProperty('zstdnet.smokeHost', project.property('smokeHost'))
+                systemProperty('fml.queryResult', 'confirm')
+            }
+        }
+    }
+    defaultRemapJar = false
+    remap(tasks.named('jar').get()) {
+        mixinRemap { enableBaseMixin(); enableMixinExtra() }
+    }
+}
+
+sourceSets.main {
+    java.srcDir '../../../shared/src/main/java'
+    resources.srcDir '../../../shared/src/main/resources'
+}
+if (project.hasProperty('smokeHost')) {
+    sourceSets.main.java.srcDir 'src/smoke/java'
+}
+// The opt-in game driver is never part of a distributable mod jar.
+jar { exclude 'cn/tohsaka/factory/zstdnet/smoke/**' }
+dependencies {
+    contain 'com.github.luben:zstd-jni:1.5.7-7'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.3'
+    // Unimined supplies these to game runs but not to the plain JUnit JVM.
+    testImplementation 'com.google.code.gson:gson:2.14.0'
+    testImplementation 'org.slf4j:slf4j-api:2.0.18'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.18'
+    // Exercise Minecraft's actual compression decoder, not a permissive replacement.
+    testImplementation files(sourceSets.main.compileClasspath)
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+test {
+    useJUnitPlatform()
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    systemProperty 'zstdnet.gameDir', layout.buildDirectory.dir('test-game').get().asFile.absolutePath
+}
+tasks.register('productionProbe', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'cn.tohsaka.factory.zstdnet.validation.ProductionProbe'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    args project.findProperty('probeHost') ?: '127.0.0.1', project.findProperty('probePort') ?: '35586'
+    systemProperty 'zstdnet.probeReportAllowed', project.findProperty('probeReportAllowed') ?: 'false'
+    systemProperty 'zstdnet.probeRaw', project.findProperty('probeRaw') ?: 'false'
+    systemProperty 'zstdnet.probeSkipReport', project.findProperty('probeSkipReport') ?: 'false'
+    systemProperty 'zstdnet.probeCheckPipeline', project.findProperty('probeCheckPipeline') ?: 'false'
+    if (project.hasProperty('probeExpectedThreshold')) systemProperty 'zstdnet.probeExpectedThreshold', project.property('probeExpectedThreshold')
+}
+def packagedNative = layout.buildDirectory.file('native-probe/zstd-jni-1.5.7-7.jar')
+tasks.register('verifyArtifact') {
+    dependsOn 'remapJar'
+    doLast {
+        def artifact = tasks.named('remapJar').get().archiveFile.get().asFile
+        new java.util.jar.JarFile(artifact).withCloseable { jarFile ->
+            assert jarFile.manifest.mainAttributes.getValue('ContainedDeps') == 'zstd-jni-1.5.7-7.jar'
+            assert jarFile.getEntry('zstdnet.mixin-refmap.json') != null
+            assert jarFile.getEntry('cn/tohsaka/factory/zstdnet/smoke/ClientSmoke.class') == null
+            byte[] nativeJar = jarFile.getInputStream(jarFile.getEntry('zstd-jni-1.5.7-7.jar')).bytes
+            assert java.util.Arrays.equals(nativeJar, configurations.contain.singleFile.bytes): 'JNI jar must be unchanged'
+            def target = packagedNative.get().asFile
+            target.parentFile.mkdirs()
+            target.bytes = nativeJar
+        }
+    }
+}
+tasks.register('verifyPackagedNative', JavaExec) {
+    dependsOn 'verifyArtifact', 'testClasses'
+    classpath = files(sourceSets.test.output, packagedNative)
+    mainClass = 'cn.tohsaka.factory.zstdnet.validation.NativeArtifactProbe'
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+}
+check.dependsOn 'verifyPackagedNative'
+jar {
+    archiveClassifier = 'dev'
+    // Keep the complete upstream JNI jar, including all native resources.
+    from(configurations.contain)
+    doFirst {
+        manifest.attributes(
+            'ModType': 'CRL',
+            'MixinConfigs': 'zstdnet.mixin.json',
+            'ContainedDeps': configurations.contain.collect { it.name }.join(' '),
+            'NonModDeps': 'true'
+        )
+    }
+    finalizedBy 'remapJar'
+}

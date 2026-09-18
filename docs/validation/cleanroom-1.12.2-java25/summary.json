@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-18",
+  "java": "Temurin 25.0.4.1+1",
+  "platform": "Windows 11 amd64",
+  "artifact": "mods/1.12.2/zstdnet-cleanroom/build/libs/zstdnet-1.12.2-cleanroom-1.4.7-cleanroom.1.jar",
+  "sha256": "59515B21DBDA3879F7979A251934424F485A0C5B54884EE85B0BDDD7E4A2E8E5",
+  "tests": 25.0,
+  "failures": 0.0,
+  "suites": [
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.client.TrafficReportGeneratorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.844
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.core.stats.TrafficStatisticsServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.315
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.network.ReportAssemblyTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.008
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.proxy.HandshakeTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.026
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.proxy.LocalZstdNetUdpPassthroughTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.034
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.server.ForwardedAddressTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.007
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.server.ProxyBoundaryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.099
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.server.ProxyIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.2
+    },
+    {
+      "suite": "cn.tohsaka.factory.zstdnet.server.ServerProxyRuntimeVoiceChatTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.023
+    }
+  ]
+}

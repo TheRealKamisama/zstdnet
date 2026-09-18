@@ -1,0 +1,213 @@
+[22:16:21] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLServerTweaker
+[22:16:21] [main/INFO] [Foundation]: Using primary tweak name net.minecraftforge.fml.common.launcher.FMLServerTweaker
+[22:16:21] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLServerTweaker@19b89d4
+[22:16:21] [main/INFO] [FML.TWEAK]: Jar location: file:/C:/Users/TheRe/.codex/worktrees/91dc/zstdnet/.tools/production-server/cleanroom-0.6.10-alpha.jar
+[22:16:21] [main/INFO] [FML]: Forge Mod Loader version 14.23.5.2864 for Minecraft 1.12.2 loading
+[22:16:21] [main/INFO] [FML]: Cleanroom version 0.6.10-alpha
+[22:16:21] [main/INFO] [FML]: Java is OpenJDK 64-Bit Server VM, version 25.0.4.1, running on Windows 11:amd64:10.0, installed at C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\jdk25\jdk-25.0.4.1+1
+[22:16:21] [main/INFO] [Cleanroom]: Initializing CleanMix...
+[22:16:21] [main/INFO] [CleanMix]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=jar:file:/C:/Users/TheRe/.codex/worktrees/91dc/zstdnet/.tools/production-server/libraries/com/cleanroommc/cleanmix/0.7.2/cleanmix-0.7.2.jar!/org/spongepowered/asm/mixin/MixinEnvironment.class Service=CleanMix Env=SERVER
+[22:16:21] [main/INFO] [Cleanroom]: Discovering mods
+[22:16:21] [main/INFO] [FML]: Searching C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\.\mods for mods
+[22:16:21] [main/INFO] [FML]: Searching C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\.\mods\1.12.2 for mods
+[22:16:22] [main/INFO] [Cleanroom]: Finished discovering mods. Found 1 discovered mod ids in 245 ms.
+[22:16:22] [main/INFO] [Cleanroom]: Initializing MixinExtras...
+[22:16:22] [main/INFO] [Foundation]: Loading tweak name org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[22:16:22] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[22:16:22] [main/INFO] [Foundation]: Loading tweak name org.spongepowered.asm.launch.MixinTweaker
+[22:16:22] [main/INFO] [Foundation]: Loading tweak name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[22:16:22] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker@44924587
+[22:16:22] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker@44924587
+[22:16:22] [main/INFO] [Foundation]: Calling tweak org.spongepowered.asm.mixin.EnvironmentStateTweaker@4487c0c2
+[22:16:22] [main/INFO] [Foundation]: Calling tweak FMLCorePlugin
+[22:16:23] [main/INFO] [FML]: FML appears to be missing any signature data. This is expected, don't worry.
+[22:16:23] [main/INFO] [Foundation]: Calling tweak FMLForgePlugin
+[22:16:23] [main/INFO] [Foundation]: Calling tweak org.spongepowered.asm.launch.MixinTweaker@78910096
+[22:16:23] [main/INFO] [Foundation]: Calling tweak net.minecraftforge.fml.common.launcher.FMLDeobfTweaker@39dec536
+[22:16:23] [main/INFO] [Foundation]: Launching wrapped minecraft net.minecraft.server.MinecraftServer
+[22:16:27] [main/INFO] [MixinExtras|Service]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.5).
+[22:16:28] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Starting minecraft server version 1.12.2
+[22:16:28] [Server thread/INFO] [FML]: Cleanroom v0.6.10-alpha Initialized
+[22:16:28] [Server thread/INFO] [FML]: Starts to replace vanilla recipe ingredients with ore ingredients.
+[22:16:28] [Server thread/INFO] [FML]: Invalid recipe found with multiple oredict ingredients in the same ingredient...
+[22:16:28] [Server thread/INFO] [FML]: Replaced 1227 ore ingredients
+[22:16:28] [Server thread/WARN] [FML]: These mods are missing:
+[22:16:28] [Server thread/WARN] [FML]:   Fugue is missing
+[22:16:28] [Server thread/WARN] [FML]:   Scalar is missing
+[22:16:28] [Server thread/INFO] [FML]: Using fml.queryResult confirm to answer the following query:
+WARNING
+Fugue and Scalar are not installed
+Your pack may crash without these mods.
+To disable this warning, check forge_early.cfg
+
+Run the command /fml confirm to proceed, or /fml cancel to abort.
+[22:16:28] [Server thread/INFO] [Kirino Core]: Initializing Kirino-Engine's Mod Container.
+[22:16:28] [Server thread/INFO] [Kirino Core]: Initializing Kirino-ECS's Mod Container.
+[22:16:28] [Server thread/INFO] [Kirino Core]: Initializing Kirino-GL's Mod Container.
+[22:16:28] [Server thread/INFO] [FML]: Forge Mod Loader has identified 12 mods to load
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for cleanmix: assets/cleanmix/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for mixinbooter: assets/mixinbooter/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for configanytime: assets/configanytime/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for kirino_engine: assets/kirino_engine/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for kirino_ecs: assets/kirino_ecs/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for kirino_gl: assets/kirino_gl/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for FML: assets/fml/lang/en_us.lang
+[22:16:28] [Server thread/WARN] [FML]: Missing English translation for zstdnet: assets/zstdnet/lang/en_us.lang
+[22:16:28] [Server thread/INFO] [FML]: FML has found a non-mod file zstd-jni-1.5.7-7.jar in your mods directory. It will now be injected into your classpath.
+[22:16:28] [Server thread/INFO] [FML]: Attempting connection with missing mods [minecraft, mcp, cleanroom, cleanmix, mixinbooter, configanytime, kirino_engine, kirino_ecs, kirino_gl, FML, forge, zstdnet] at CLIENT
+[22:16:28] [Server thread/INFO] [FML]: Attempting connection with missing mods [minecraft, mcp, cleanroom, cleanmix, mixinbooter, configanytime, kirino_engine, kirino_ecs, kirino_gl, FML, forge, zstdnet] at SERVER
+[22:16:29] [Server thread/INFO] [FML]: Processing ObjectHolder annotations
+[22:16:29] [Server thread/INFO] [FML]: Found 1168 ObjectHolder annotations
+[22:16:29] [Server thread/INFO] [FML]: Identifying ItemStackHolder annotations
+[22:16:29] [Server thread/INFO] [FML]: Found 0 ItemStackHolder annotations
+[22:16:29] [Server thread/INFO] [FML]: Configured a dormant chunk cache size of 0
+[22:16:29] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Starting version check at https://download.cleanroommc.com/api/forge
+[22:16:29] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:29] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:29] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:29] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:29] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:29] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:29] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:29] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:29] [Server thread/INFO] [FML]: Injecting itemstacks
+[22:16:29] [Server thread/INFO] [FML]: Itemstack injection complete
+[22:16:29] [Server thread/INFO] [Kirino Core]: ---------- Kirino Common Initialization ----------
+[22:16:29] [Server thread/INFO] [Kirino Core]: Registered the default ShaderRegistrationEvent listener.
+[22:16:29] [Server thread/INFO] [Kirino Core]: Registered the default PostProcessingRegistrationEvent listener.
+[22:16:29] [Server thread/INFO] [Kirino Core]: Initializing ECS Runtime.
+[22:16:30] [Server thread/INFO] [Kirino Core]: ECS Runtime Initialized. Time taken: 84 ms
+[22:16:30] [Server thread/INFO] [Kirino Core]: Initializing Kirino Engine.
+[22:16:30] [Server thread/INFO] [Kirino Core]: Registered headless module installer "com.cleanroommc.kirino.engine.analysis.install.AnalyticalWorldInstaller".
+[22:16:30] [Server thread/INFO] [Kirino Core]: Registered graphics module installer "com.cleanroommc.kirino.engine.graphics.install.GraphicsWorldInstaller".
+[22:16:30] [Server thread/INFO] [Kirino Core]: Kirino Engine Initialized. Time taken: 311 ms
+[22:16:30] [Server thread/INFO] [Kirino Core]: ---------- Kirino Server-Side Initialization ----------
+[22:16:30] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Loading properties
+[22:16:30] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Default game type: SURVIVAL
+[22:16:30] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Generating keypair
+[22:16:30] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Starting Minecraft server on 127.0.0.1:25586
+[22:16:30] [Server thread/INFO] [net.minecraft.network.NetworkSystem]: Using default channel type
+[22:16:30] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[22:16:30] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[22:16:30] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[22:16:30] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[22:16:31] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:31] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:31] [Server thread/INFO] [FML]: Injecting itemstacks
+[22:16:31] [Server thread/INFO] [FML]: Itemstack injection complete
+[22:16:31] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Found status: BETA_OUTDATED Target: 0.6.13-alpha
+[22:16:31] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[22:16:31] [Server thread/INFO] [FML]: Forge Mod Loader has successfully loaded 12 mods
+[22:16:31] [Server thread/INFO] [Kirino Core]: ---------- Kirino Common Post-Initialization ----------
+[22:16:31] [Server thread/INFO] [Kirino Core]: ---------- Kirino Server-Side Post-Initialization ----------
+[22:16:31] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Preparing level "zstdnet-test-world"
+[22:16:31] [Server thread/INFO] [FML.ModTracker]: This world was saved with mod zstdnet version 1.4.7-cleanroom.1 and it is now at version 1.4.7-cleanroom.2, things may not work well
+[22:16:31] [Server thread/INFO] [FML]: Injecting existing registry data into this server instance
+[22:16:31] [Server thread/INFO] [FML]: Setting Object Holders with value...
+[22:16:31] [Server thread/INFO] [FML]: Object Holders set.
+[22:16:32] [Server thread/INFO] [FML]: Loading dimension 0 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@79e15388)
+[22:16:32] [Server thread/INFO] [net.minecraft.advancements.AdvancementList]: Loaded 488 advancements
+[22:16:32] [Server thread/INFO] [FML]: Loading dimension -1 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@79e15388)
+[22:16:32] [Server thread/INFO] [FML]: Loading dimension 1 (zstdnet-test-world) (net.minecraft.server.dedicated.DedicatedServer@79e15388)
+[22:16:32] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Preparing start region for level 0
+[22:16:32] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Found status: BETA Target: null
+[22:16:33] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Done (1.850s)! For help, type "help" or "?"
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] periodic stats logging disabled.
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] voice chat UDP passthrough disabled.
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] UDP route armed [game]: 127.0.0.1:35586 -> 127.0.0.1:25586
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] started: mode=dedicated listen=127.0.0.1:35586 target=127.0.0.1:25586
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] guard: max_conn=9999 max_req=50 window=PT10S ban=PT1M
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] tuning: flush=PT0.002S idle_timeout=PT0S rate_per_conn=0B/s rate_global=0B/s burst=262144B
+[22:16:33] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] raw vanilla login passthrough: disabled
+[22:16:33] [Server thread/INFO] [FML]: Unloading dimension -1
+[22:16:33] [Server thread/INFO] [FML]: Unloading dimension 1
+[22:17:24] [zstdsrv-worker-2/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:17:24] [Netty Server IO #2/WARN] [cn.tohsaka.factory.zstdnet.server.ServerProxyConfigFile]: [zstdnet-server] network_compression_threshold is missing in C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\config\zstdnet-server.properties; using 1048576 for BOTH login announcement and pipeline. Add this key explicitly to document the deployment.
+[22:17:25] [Netty Server IO #2/INFO] [FML]: Client protocol version 2
+[22:17:25] [Netty Server IO #2/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:17:25] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:17:25] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:53661] logged in with entity id 25 at (658.5, 4.0, 938.5)
+[22:17:25] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:17:49] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:17:49] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:20:00] [zstdsrv-worker-5/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:20:01] [Netty Server IO #4/INFO] [FML]: Client protocol version 2
+[22:20:01] [Netty Server IO #4/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:20:01] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:20:01] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:49673] logged in with entity id 18866 at (658.5, 4.0, 938.5)
+[22:20:01] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:20:06] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:20:06] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:20:07] [zstdsrv-worker-6/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:20:07] [Netty Server IO #5/INFO] [FML]: Client protocol version 2
+[22:20:07] [Netty Server IO #5/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:20:07] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:20:07] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:51167] logged in with entity id 22497 at (658.5, 4.0, 938.5)
+[22:20:07] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:20:12] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:20:12] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:20:12] [zstdsrv-worker-5/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:20:12] [Netty Server IO #6/INFO] [FML]: Client protocol version 2
+[22:20:12] [Netty Server IO #6/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:20:12] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:20:12] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:56158] logged in with entity id 26427 at (658.5, 4.0, 938.5)
+[22:20:12] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:20:17] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:20:17] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:21:37] [zstdsrv-worker-8/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:21:37] [Netty Server IO #8/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyConfigFile]: [zstdnet-server] proxied login/pipeline compression threshold=-1 from C:\Users\TheRe\.codex\worktrees\91dc\zstdnet\.tools\production-server\config\zstdnet-server.properties
+[22:21:37] [Netty Server IO #8/INFO] [FML]: Client protocol version 2
+[22:21:37] [Netty Server IO #8/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:21:37] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:21:37] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:57783] logged in with entity id 30705 at (658.5, 4.0, 938.5)
+[22:21:37] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:21:42] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:21:42] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:21:43] [zstdsrv-worker-9/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:21:43] [Netty Server IO #9/INFO] [FML]: Client protocol version 2
+[22:21:43] [Netty Server IO #9/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:21:43] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:21:43] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:53397] logged in with entity id 34883 at (658.5, 4.0, 938.5)
+[22:21:43] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:21:48] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:21:48] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:21:48] [zstdsrv-worker-8/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] appended forwarded real IP 127.0.0.1 to login handshake host '127.0.0.1\0FML\0'
+[22:21:48] [Netty Server IO #10/INFO] [FML]: Client protocol version 2
+[22:21:48] [Netty Server IO #10/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:21:48] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:21:48] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:58810] logged in with entity id 38788 at (658.5, 4.0, 938.5)
+[22:21:48] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:21:53] [zstdsrv-worker-7/WARN] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: pipe error source=127.0.0.1 dir=client->mc: com.github.luben.zstd.ZstdIOException: Truncated source
+[22:21:53] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:21:53] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:24:09] [Netty Server IO #12/INFO] [FML]: Client protocol version 2
+[22:24:09] [Netty Server IO #12/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:24:09] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:24:09] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:60449] logged in with entity id 42696 at (658.5, 4.0, 938.5)
+[22:24:09] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:24:14] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:24:14] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:24:15] [Netty Server IO #13/INFO] [FML]: Client protocol version 2
+[22:24:15] [Netty Server IO #13/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:24:15] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:24:15] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:62185] logged in with entity id 46395 at (658.5, 4.0, 938.5)
+[22:24:15] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:24:20] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:24:20] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:24:21] [Netty Server IO #14/INFO] [FML]: Client protocol version 2
+[22:24:21] [Netty Server IO #14/INFO] [FML]: Client attempting to join with 12 mods : minecraft@1.12.2,cleanroom@0.6.10-alpha,configanytime@3.0,kirino_engine@epoch-1.a5,zstdnet@1.4.7-cleanroom.2,FML@8.0.99.99,kirino_gl@epoch-1.a2,forge@14.23.5.2864,mixinbooter@11.8,cleanmix@0.7.2,kirino_ecs@epoch-1.a3,mcp@9.42
+[22:24:21] [Server thread/INFO] [FML]: [Server thread] Server side modded connection established
+[22:24:21] [Server thread/INFO] [net.minecraft.server.management.PlayerList]: ZstdProbe[/127.0.0.1:62584] logged in with entity id 50550 at (658.5, 4.0, 938.5)
+[22:24:21] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe joined the game
+[22:24:26] [Server thread/INFO] [net.minecraft.network.NetHandlerPlayServer]: ZstdProbe lost connection: Disconnected
+[22:24:26] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: ZstdProbe left the game
+[22:25:14] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer]: Stopping the server
+[22:25:14] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Stopping server
+[22:25:14] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving players
+[22:25:14] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds
+[22:25:14] [Server thread/INFO] [net.minecraft.server.MinecraftServer]: Saving chunks for level 'zstdnet-test-world'/overworld
+[22:25:14] [Server thread/INFO] [FML]: Unloading dimension 0
+[22:25:14] [Server thread/INFO] [cn.tohsaka.factory.zstdnet.server.ServerProxyRuntime]: [zstdnet-server] stopped
+[22:25:14] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Stopping server
+[22:25:14] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Saving players
+[22:25:14] [Server Shutdown Thread/INFO] [net.minecraft.server.MinecraftServer]: Saving worlds

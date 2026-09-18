@@ -1,0 +1,72 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+[Unimined] Plugin Version: 1.4.36-kappa
+
+[Unimined] Gradle is running in offline mode.
+[Unimined] Will attempt to use cached minecraft metadata files.
+
+kotlin-logging: initializing... active logger factory: Slf4jLoggerFactory
+[Unimined/MinecraftDownloader] retrieving version metadata
+[Unimined/Forge] Using FG3 transformer
+[Unimined/Minecraft ::main] Applying minecraft config for source set 'main'
+[Unimined/Minecraft ::main] Applying CleanroomFG3
+[Unimined/ForgeTransformer] Attempting inject forge userdev into minecraft jar
+[Unimined/Minecraft ::main] Applying run configs
+Merging client and server jars...
+[Unimined/Forge] transforming minecraft jar for FG3
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class ain$22, {official=ain$22, searge=net/minecraft/item/Item$22, mcp=net/minecraft/item/Item$22}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class anh$FlowerEntry, {official=anh$FlowerEntry, searge=net/minecraft/world/biome/Biome$FlowerEntry, mcp=net/minecraft/world/biome/Biome$FlowerEntry}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class anp$EmeraldGenerator, {official=anp$EmeraldGenerator, searge=net/minecraft/world/biome/BiomeHills$EmeraldGenerator, mcp=net/minecraft/world/biome/BiomeHills$EmeraldGenerator}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class awu$Builder, {official=awu$Builder, searge=net/minecraft/block/state/BlockStateContainer$Builder, mcp=net/minecraft/block/state/BlockStateContainer$Builder}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class aym$WorldSleepResult, {official=aym$WorldSleepResult, searge=net/minecraft/world/WorldProvider$WorldSleepResult, mcp=net/minecraft/world/WorldProvider$WorldSleepResult}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class c$4, {official=c$4, searge=net/minecraft/crash/CrashReportCategory$4, mcp=net/minecraft/crash/CrashReportCategory$4}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class c$5, {official=c$5, searge=net/minecraft/crash/CrashReportCategory$5, mcp=net/minecraft/crash/CrashReportCategory$5}
+[Unimined/JarMod ::source set 'main'] Adding mappings for added inner class ot$1, {official=ot$1, searge=net/minecraft/server/management/PlayerChunkMapEntry$1, mcp=net/minecraft/server/management/PlayerChunkMapEntry$1}
+[Unimined/ForgeTransformer] Applying ATs [forge_at.cfg]
+[Unimined/ModRemapper] Remapping mods from searge to mcp
+[Unimined/ModRemapper] No mods found for remapping
+
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :productionProbe
+PRODUCTION_STATUS_OK {"description":{"text":"A Minecraft Server"},"players":{"max":20,"online":0},"version":{"name":"1.12.2","protocol":340},"modinfo":{"type":"FML","modList":[{"modid":"minecraft","version":"1.12.2"},{"modid":"mcp","version":"9.42"},{"modid":"cleanroom","version":"0.6.10-alpha"},{"modid":"cleanmix","version":"0.7.2"},{"modid":"mixinbooter","version":"11.8"},{"modid":"configanytime","version":"3.0"},{"modid":"kirino_engine","version":"epoch-1.a5"},{"modid":"kirino_ecs","version":"epoch-1.a3"},{"modid":"kirino_gl","version":"epoch-1.a2"},{"modid":"FML","version":"8.0.99.99"},{"modid":"forge","version":"14.23.5.2864"},{"modid":"zstdnet","version":"1.4.7-cleanroom.2"}]}}
+SLF4J(W): Class path contains multiple SLF4J providers.
+SLF4J(W): Found provider [org.apache.logging.slf4j.SLF4JServiceProvider@47fd17e3]
+SLF4J(W): Found provider [org.slf4j.simple.SimpleServiceProvider@7cdbc5d3]
+SLF4J(W): See https://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J(I): Actual provider is of type [org.apache.logging.slf4j.SLF4JServiceProvider@47fd17e3]
+2026-09-18T14:24:09.026005200Z main WARN The use of package scanning to locate Log4j plugins is deprecated.
+Please remove the `packages` attribute from your configuration file.
+See https://logging.apache.org/log4j/2.x/faq.html#package-scanning for details.
+LOGIN_COMPRESSION 256
+SERVER_COMPRESSION_DIAGNOSTIC ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+SERVER_PIPELINE_MATCH ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+PRODUCTION_FML_WIRE_OK round=1 registries=11 chunks=49 threshold=256 strictMinecraftDecoder=true sustainedPlayMillis=5004
+LOGIN_COMPRESSION 256
+SERVER_COMPRESSION_DIAGNOSTIC ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+SERVER_PIPELINE_MATCH ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+PRODUCTION_FML_WIRE_OK round=2 registries=11 chunks=49 threshold=256 strictMinecraftDecoder=true sustainedPlayMillis=5386
+LOGIN_COMPRESSION 256
+SERVER_COMPRESSION_DIAGNOSTIC ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+SERVER_PIPELINE_MATCH ZSTDNET_COMPRESSION expected=256 encoder=256 decoder=256 proxied=false
+PRODUCTION_FML_WIRE_OK round=3 registries=11 chunks=49 threshold=256 strictMinecraftDecoder=true sustainedPlayMillis=5065
+PRODUCTION_PROBE_SUCCESS status, ping, FML wire handshake, chunks, three reconnects
+
+[Incubating] Problems report is available at: file:///C:/Users/TheRe/.codex/worktrees/91dc/zstdnet/mods/1.12.2/zstdnet-cleanroom/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.7.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 50s
+4 actionable tasks: 2 executed, 2 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.7.0/userguide/configuration_cache_enabling.html

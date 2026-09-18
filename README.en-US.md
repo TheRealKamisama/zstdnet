@@ -1,4 +1,10 @@
-# ZstdNet
+# ZstdNet — Cleanroom 1.12.2 Fork
+
+This repository is a **ZstdNet backport fork**, extending compatibility back to **Minecraft 1.12.2 on Cleanroom / Java 25** while retaining the existing modern-version modules. The current Cleanroom module is `1.4.7-cleanroom.4`. A user has confirmed successful server connections and working Zstd compression.
+
+See the [Cleanroom build and usage guide (Chinese)](mods/1.12.2/zstdnet-cleanroom/README.zh-CN.md), [migration validation](docs/cleanroom-1.12.2-java25-validation.zh-CN.md), [compression fix verification](docs/cleanroom-1.12.2-compression-fix.zh-CN.md), and [client UI fixes](docs/cleanroom-1.12.2-client-ui-fix.zh-CN.md). This backport requires Cleanroom and Java 25; it does not target traditional Forge 1.12.2 / Java 8 or provide multiplayer across Minecraft versions.
+
+The instructions below describe the retained modern versions. Use the dedicated guide for Cleanroom commands, configuration paths, permissions, and LAN validation status. CurseForge links refer to the upstream project, not a published Cleanroom release of this fork.
 
 ZstdNet is a Minecraft Java Edition mod that uses ZSTD to compress relayed traffic between clients and servers, with the goal of significantly reducing public bandwidth usage in high-repetition data scenarios.
 
@@ -38,7 +44,7 @@ Raw: 189.07 GB (4.8MB/s) | Zstd: 10.28 GB (303.7KB/s) | Ratio: 5.44% | Conns: 8
 It is recommended to install this mod on both the client and the server.
 
 - Current versions supported in this repository:
-  Forge 1.20.1, NeoForge 1.20.1, NeoForge 1.21.1, Fabric 1.20.1, Fabric 1.21.1
+  **Cleanroom 1.12.2 / Java 25 (added by this fork)**; retained modules for Forge 1.20.1, NeoForge 1.20.1, NeoForge 1.21.1, Fabric 1.20.1, and Fabric 1.21.1
 - When connecting to a remote ZstdNet-enabled server: the client needs it
 - When using the built-in Zstd server entry: the server needs it
 - When opening a LAN world and sharing a Zstd entry externally: the host client needs it
