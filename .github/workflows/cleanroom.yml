@@ -1,0 +1,127 @@
+name: Cleanroom build and release
+
+on:
+  push:
+    branches: [cleanroom-1.12.2]
+    tags: ['v*-cleanroom*']
+  pull_request:
+    branches: [cleanroom-1.12.2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cleanroom-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache verified Java toolchains
+        uses: actions/cache@v4
+        with:
+          path: |
+            .tools/jdk25
+            .tools/jdk8
+          key: cleanroom-jdks-${{ runner.os }}-${{ hashFiles('mods/1.12.2/zstdnet-cleanroom/build.ps1') }}
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .tools/gradle-home/caches
+            .tools/gradle-home/wrapper
+          key: cleanroom-gradle-${{ runner.os }}-${{ hashFiles('mods/1.12.2/zstdnet-cleanroom/*.gradle', 'mods/1.12.2/zstdnet-cleanroom/gradle.properties', 'mods/1.12.2/zstdnet-cleanroom/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: cleanroom-gradle-${{ runner.os }}-
+
+      - name: Build, test, remap, and verify packaged JNI
+        shell: pwsh
+        run: ./mods/1.12.2/zstdnet-cleanroom/build.ps1 -Tasks @('build')
+
+      - name: Package production JAR and checksum
+        id: package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $module = 'mods/1.12.2/zstdnet-cleanroom'
+          $versionMatch = [regex]::Match((Get-Content "$module/build.gradle" -Raw), "(?m)^version = '([^']+)'\r?$")
+          if (!$versionMatch.Success) { throw 'Cannot read release version' }
+          $version = $versionMatch.Groups[1].Value
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME does not match mod version v$version"
+          }
+          $metadata = Get-Content "$module/src/main/resources/mcmod.info" -Raw | ConvertFrom-Json
+          if ($metadata[0].version -cne $version) { throw 'mcmod.info version mismatch' }
+          $modSource = Get-Content "$module/src/main/java/cn/tohsaka/factory/zstdnet/Zstdnet.java" -Raw
+          if (!$modSource.Contains(('version = "{0}"' -f $version))) { throw '@Mod version mismatch' }
+          $jarName = "zstdnet-1.12.2-cleanroom-$version.jar"
+          $jarPath = Join-Path $module "build/libs/$jarName"
+          if (!(Test-Path -LiteralPath $jarPath)) { throw "Missing production JAR: $jarPath" }
+          New-Item -ItemType Directory -Force build/release | Out-Null
+          Copy-Item -LiteralPath $jarPath -Destination build/release
+          $hash = (Get-FileHash -LiteralPath $jarPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $jarName" | Set-Content -Encoding utf8NoBOM "build/release/$jarName.sha256"
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanroom-${{ github.sha }}
+          path: build/release/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanroom-verification-${{ github.sha }}
+          path: |
+            mods/1.12.2/zstdnet-cleanroom/build/reports/
+            mods/1.12.2/zstdnet-cleanroom/build/test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cleanroom-${{ github.sha }}
+          path: release-assets
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $notes = "docs/releases/$env:RELEASE_VERSION.md"
+          if (!(Test-Path -LiteralPath $notes)) { throw "Missing release notes: $notes" }
+          $assets = @(Get-ChildItem -LiteralPath release-assets -File)
+          if ($assets.Count -ne 2) { throw 'Expected one production JAR and one checksum' }
+          $jar = $assets | Where-Object Extension -eq '.jar'
+          $checksum = $assets | Where-Object Extension -eq '.sha256'
+          if (!$jar -or !$checksum) { throw 'Missing JAR or checksum' }
+          $expected = ((Get-Content -LiteralPath $checksum.FullName -Raw).Trim() -split '\s+')[0]
+          if ((Get-FileHash -LiteralPath $jar.FullName -Algorithm SHA256).Hash -ine $expected) { throw 'Release checksum mismatch' }
+          $releaseArguments = @('release', 'create', $env:RELEASE_TAG, '--verify-tag', '--title', "ZstdNet Cleanroom $env:RELEASE_VERSION", '--notes-file', $notes)
+          if ($env:RELEASE_VERSION -match '-(alpha|beta|rc)[.-]') { $releaseArguments += '--prerelease' }
+          $releaseArguments += @($jar.FullName, $checksum.FullName)
+          & gh @releaseArguments
+          if ($LASTEXITCODE -ne 0) { throw "Release failed: $LASTEXITCODE" }

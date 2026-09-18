@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 
-@Mod(modid = Zstdnet.MODID, name = "ZstdNet", version = "1.4.7-cleanroom.4",
+@Mod(modid = Zstdnet.MODID, name = "ZstdNet", version = "1.4.7-cleanroom-alpha.1",
      acceptedMinecraftVersions = "[1.12.2]", acceptableRemoteVersions = "*",
      guiFactory = "cn.tohsaka.factory.zstdnet.client.ConfigGuiFactory")
 public final class Zstdnet {

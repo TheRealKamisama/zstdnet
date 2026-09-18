@@ -2,7 +2,9 @@
 
 本模块是 ZstdNet Fork 的向后移植，将兼容范围扩展至 **Minecraft 1.12.2 / Cleanroom / Java 25**。它需要 Cleanroom，不适用于传统 Forge 1.12.2 / Java 8；不同 Minecraft 版本仍不能互相联机。
 
-新增的独立迁移模块，版本 `1.4.7-cleanroom.4`。现有 1.20/1.21 平台代码未修改；`.4` 更新了共享报表模板的中英文百分比文案，将两处“线路／原始”改为“压缩后剩余”，绿色百分比标为“节省流量”。用户已确认 `.2` 能实际进入服务器且 Zstd 压缩率正常；LAN 和完整整合包验收仍待完成。详见 [迁移记录](../../../docs/cleanroom-1.12.2-java25-validation.zh-CN.md)、[压缩修复验证](../../../docs/cleanroom-1.12.2-compression-fix.zh-CN.md) 和 [`.3` 客户端界面修复](../../../docs/cleanroom-1.12.2-client-ui-fix.zh-CN.md)。
+新增的独立迁移模块，版本 `1.4.7-cleanroom-alpha.1`，整合此前 `.1`–`.4` 的迁移与修复。现有 1.20/1.21 平台代码未修改；共享报表模板将两处“线路／原始”改为“压缩后剩余”，绿色百分比标为“节省流量”。用户已确认实际进入服务器且 Zstd 压缩率正常；LAN 和完整整合包验收仍待完成。详见 [迁移记录](../../../docs/cleanroom-1.12.2-java25-validation.zh-CN.md)、[压缩修复验证](../../../docs/cleanroom-1.12.2-compression-fix.zh-CN.md) 和 [客户端界面修复](../../../docs/cleanroom-1.12.2-client-ui-fix.zh-CN.md)。
+
+下载：[GitHub Releases](https://github.com/TheRealKamisama/zstdnet-cleanroom/releases)。请选择生产 JAR，升级时替换旧版 ZstdNet 文件；alpha 版本会标记为 Pre-release。
 
 ## 构建
 
@@ -24,9 +26,17 @@ Windows，在仓库根目录执行：
 JAVA_HOME=/path/to/jdk25 sh ./gradlew -Porg.gradle.java.installations.paths=/path/to/jdk25,/path/to/jdk8 build
 ```
 
-产物：`build/libs/zstdnet-1.12.2-cleanroom-1.4.7-cleanroom.4.jar`。不要把 `-dev.jar` 放进生产环境。`build` 包括 JUnit、生产重映射、内嵌 JNI JAR 完整性校验和独立 JVM 原生压缩往返。测试结果在 `build/reports/tests/test/index.html`。
+产物：`build/libs/zstdnet-1.12.2-cleanroom-1.4.7-cleanroom-alpha.1.jar`。不要把 `-dev.jar` 放进生产环境。`build` 包括 JUnit、生产重映射、内嵌 JNI JAR 完整性校验和独立 JVM 原生压缩往返。测试结果在 `build/reports/tests/test/index.html`。
 
 zstd-jni 使用 `ContainedDeps` 内嵌原始完整 JAR，**不 relocate、不最小化、不解包重组 JNI 类**。Cleanroom 提供 Gson/SLF4J/Netty，不重复内嵌。启动游戏建议加 `--enable-native-access=ALL-UNNAMED`。
+
+## GitHub Actions 与发布
+
+工作流为 [cleanroom.yml](../../../.github/workflows/cleanroom.yml)。`cleanroom-1.12.2` 分支推送、面向该分支的 PR，以及手动运行都会在 Windows runner 上执行完整构建、JUnit、重映射和 JNI 校验，并上传构建产物及测试报告。
+
+发布时同步更新 `build.gradle`、`Zstdnet.java` 的 `@Mod` 和 `mcmod.info` 版本，在 `docs/releases/<版本>.md` 编写发布说明，再推送与版本一致的 `v<版本>` 标签，例如 `v1.4.7-cleanroom-alpha.1`。标签触发的构建通过后，独立发布任务从该次构建取得生产 JAR，校验 SHA256，再上传到 GitHub Releases。alpha、beta、rc 自动标记为预发布；开发 JAR 与测试驱动不会作为 Release 资产发布。
+
+普通构建只有仓库读取权限；仅标签的发布任务获得 `contents: write`。发布使用内置 `GITHUB_TOKEN`，无需额外个人访问令牌。CI 不会启动 Minecraft 服务器或代替用户接受 EULA。
 
 ## 手动专用服
 

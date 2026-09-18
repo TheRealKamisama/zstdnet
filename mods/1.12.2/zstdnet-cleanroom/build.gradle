@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'cn.tohsaka.factory'
-version = '1.4.7-cleanroom.4'
+version = '1.4.7-cleanroom-alpha.1'
 base.archivesName = 'zstdnet-1.12.2-cleanroom'
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 

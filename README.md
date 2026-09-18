@@ -4,7 +4,9 @@
 
 This is a **ZstdNet fork with a backport to Minecraft 1.12.2 on Cleanroom / Java 25**, alongside the existing modern-version modules.
 
-Cleanroom 模块当前版本为 `1.4.7-cleanroom.4`。用户已确认实际进服与 Zstd 压缩正常；构建、29 项自动回归及压缩管线验证已完成。LAN、完整整合包和跨平台验收范围见下方验证记录。此移植需要 Cleanroom 和 Java 25，不是传统 Forge 1.12.2 / Java 8 版本，也不提供跨 Minecraft 版本联机。
+Cleanroom 模块当前版本为 `1.4.7-cleanroom-alpha.1`。用户已确认实际进服与 Zstd 压缩正常；构建、29 项自动回归及压缩管线验证已完成。LAN、完整整合包和跨平台验收范围见下方验证记录。此移植需要 Cleanroom 和 Java 25，不是传统 Forge 1.12.2 / Java 8 版本，也不提供跨 Minecraft 版本联机。
+
+**下载：[GitHub Releases（包含 alpha 预发布）](https://github.com/TheRealKamisama/zstdnet-cleanroom/releases)**。长期维护及默认分支为 `cleanroom-1.12.2`；`main` 保留上游基线。版本标签触发 GitHub Actions，构建与验证通过后自动发布生产 JAR 和 SHA256 校验文件。
 
 - English: [README.en-US.md](README.en-US.md)
 - 中文: [README.zh-CN.md](README.zh-CN.md)

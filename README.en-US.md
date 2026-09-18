@@ -1,6 +1,8 @@
 # ZstdNet — Cleanroom 1.12.2 Fork
 
-This repository is a **ZstdNet backport fork**, extending compatibility back to **Minecraft 1.12.2 on Cleanroom / Java 25** while retaining the existing modern-version modules. The current Cleanroom module is `1.4.7-cleanroom.4`. A user has confirmed successful server connections and working Zstd compression.
+This repository is a **ZstdNet backport fork**, extending compatibility back to **Minecraft 1.12.2 on Cleanroom / Java 25** while retaining the existing modern-version modules. The current Cleanroom module is `1.4.7-cleanroom-alpha.1`. A user has confirmed successful server connections and working Zstd compression.
+
+**Download: [GitHub Releases, including alpha prereleases](https://github.com/TheRealKamisama/zstdnet-cleanroom/releases)**. The default maintenance branch is `cleanroom-1.12.2`; `main` retains the upstream baseline. Version tags trigger GitHub Actions to build, verify, and publish the production JAR and its SHA256 checksum.
 
 See the [Cleanroom build and usage guide (Chinese)](mods/1.12.2/zstdnet-cleanroom/README.zh-CN.md), [migration validation](docs/cleanroom-1.12.2-java25-validation.zh-CN.md), [compression fix verification](docs/cleanroom-1.12.2-compression-fix.zh-CN.md), and [client UI fixes](docs/cleanroom-1.12.2-client-ui-fix.zh-CN.md). This backport requires Cleanroom and Java 25; it does not target traditional Forge 1.12.2 / Java 8 or provide multiplayer across Minecraft versions.
 
